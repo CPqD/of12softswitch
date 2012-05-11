@@ -11,7 +11,7 @@
 #include <netinet/in.h>
 
 #include "nbee_link.h"
-#include "lib/oxm-match.h"
+#include "oflib/oxm-match.h"
 #include "lib/hash.h"
 
 nbPacketDecoder *Decoder;

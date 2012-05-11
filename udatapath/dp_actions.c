@@ -42,7 +42,7 @@
 #include "packets.h"
 #include "pipeline.h"
 #include "util.h"
-#include "oxm-match.h"
+#include "oflib/oxm-match.h"
 #include "hash.h"
 
 #define LOG_MODULE VLM_dp_acts
@@ -613,7 +613,15 @@ dp_actions_output_port(struct packet *pkt, uint32_t out_port, uint32_t out_queue
                          .table_id    = pkt->table_id,
                          .data_length = MIN(max_len, pkt->buffer->size),
                          .data        = pkt->buffer->data};
-
+                
+                struct ofl_match *m = xmalloc (sizeof(struct ofl_match));
+                ofl_structs_match_init(m);
+                /* In this implementation the fields in_port and in_phy_port 
+                always will be the same, because we are not considering logical
+                ports                                 */
+                ofl_structs_match_put32(m,OXM_OF_IN_PORT,pkt->in_port);
+                ofl_structs_match_put32(m,OXM_OF_IN_PHY_PORT,pkt->in_port);
+                
                 dp_send_message(pkt->dp, (struct ofl_msg_header *)&msg, NULL);
             }
             break;

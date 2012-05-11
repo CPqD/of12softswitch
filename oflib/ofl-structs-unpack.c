@@ -39,7 +39,7 @@
 #include "ofl-utils.h"
 #include "ofl-packets.h"
 #include "ofl-log.h"
-#include "lib/oxm-match.h"
+#include "oxm-match.h"
 #include "openflow/openflow.h"
 
 #define LOG_MODULE ofl_str_u

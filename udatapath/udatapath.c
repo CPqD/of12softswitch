@@ -60,12 +60,6 @@
 #include "dirs.h"
 #include "vconn-ssl.h"
 #include "vlog-socket.h"
-//testes
-#include "oflib/ofl-structs.h"
-#include "lib/oxm-match.h"
-#include "lib/ofpbuf.h"
-#include "oflib/ofl-messages.h"
-#include "lib/hash.h"
 
 #if defined(OF_HW_PLAT)
 #include <openflow/of_hw_api.h>

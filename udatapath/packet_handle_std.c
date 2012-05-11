@@ -42,7 +42,7 @@
 #include "compiler.h"
 
 #include "lib/hash.h"
-#include "lib/oxm-match.h"
+#include "oflib/oxm-match.h"
 
 #include "nbee_link/nbee_link.h"
 
@@ -113,21 +113,17 @@ bool
 packet_handle_std_is_ttl_valid(struct packet_handle_std *handle) {
     packet_handle_std_validate(handle);
 
-    struct packet_fields *iter;
-
-    HMAP_FOR_EACH(iter,struct packet_fields, hmap_node,&handle->match.match_fields)
-    /* Find TTL field on the hmap */
-    {
-        if(iter->header == OXM_OF_MPLS_TTL || iter->header == OXM_OF_IPV4_TTL)
-	{
-	 /* Checking if TTL is valid */
-	     if (iter->value[0] <= 1)
-	     {
-             	return false;
-             }
+    if (handle->proto->mpls != NULL) {
+        uint32_t ttl = ntohl(handle->proto->mpls->fields) & MPLS_TTL_MASK;
+        if (ttl <= 1) {
+            return false;
         }
     }
-   
+    if (handle->proto->ipv4 != NULL) {
+        if (handle->proto->ipv4->ip_ttl <= 1) {
+            return false;
+        }
+    }
     return true;
 }
 
@@ -150,18 +146,9 @@ packet_handle_std_match(struct packet_handle_std *handle, struct ofl_match *matc
             return false;
         }
     }
-    
     return packet_match(match ,&handle->match );
-
 }
-/*
-bool
-packet_handle_std_match(struct packet_handle_std *handle, struct ofl_match_standard *match) {
-    packet_handle_std_validate(handle);
 
-    return 0;
-}
-*/
 
 // TODO Denicol: From this point on, work to be done
 

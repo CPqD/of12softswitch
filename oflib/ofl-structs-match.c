@@ -31,7 +31,7 @@
 
 #include "ofl-structs.h"
 #include "lib/hash.h"
-#include "lib/oxm-match.h"
+#include "oxm-match.h"
 
 
 void

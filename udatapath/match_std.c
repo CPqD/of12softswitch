@@ -32,7 +32,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include "lib/hash.h"
-#include "lib/oxm-match.h"
+#include "oflib/oxm-match.h"
 #include "match_std.h"
 #include "nbee_link/nbee_link.h"
 

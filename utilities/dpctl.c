@@ -51,6 +51,7 @@
 #include "oflib/ofl.h"
 #include "oflib-exp/ofl-exp.h"
 #include "oflib-exp/ofl-exp-openflow.h"
+#include "oflib/oxm-match.h"
 
 #include "command-line.h"
 #include "compiler.h"
@@ -66,7 +67,6 @@
 #include "util.h"
 #include "vconn-ssl.h"
 #include "vconn.h"
-#include "oxm-match.h"
 #include "ipv6_util.h"
 
 #include "xtoxll.h"

@@ -48,7 +48,7 @@
 #include "oflib/ofl-structs.h"
 #include "nbee_link/nbee_link.h"
 #include "util.h"
-#include "oxm-match.h"
+#include "oflib/oxm-match.h"
 #include "vlog.h"
 
 
@@ -101,7 +101,8 @@ send_packet_to_controller(struct pipeline *pl, struct packet *pkt, uint8_t table
             always will be the same, because we are not considering logical
             ports                                 */
         ofl_structs_match_put32(m,OXM_OF_IN_PORT,pkt->in_port);
-        ofl_structs_match_put32(m,OXM_OF_IN_PHY_PORT,pkt->in_port);         
+        ofl_structs_match_put32(m,OXM_OF_IN_PHY_PORT,pkt->in_port);
+
         
         msg.match = (struct ofl_match_header*)m;
         
@@ -119,19 +120,18 @@ pipeline_process_packet(struct pipeline *pl, struct packet *pkt) {
         VLOG_DBG_RL(LOG_MODULE, &rl, "processing packet: %s", pkt_str);
         free(pkt_str);
     }
-
-    /*if (!packet_handle_std_is_ttl_valid(pkt->handle_std)) {
+ 
+    if (!packet_handle_std_is_ttl_valid(pkt->handle_std)) {
         if ((pl->dp->config.flags & OFPC_INVALID_TTL_TO_CONTROLLER) != 0) {
             VLOG_DBG_RL(LOG_MODULE, &rl, "Packet has invalid TTL, sending to controller.");
 
-            /* NOTE: no valid reason for invalid ttl in spec.
-            send_packet_to_controller(pl, pkt, 0/*table_id/, OFPR_NO_MATCH);
+            send_packet_to_controller(pl, pkt, 0/*table_id*/, OFPR_INVALID_TTL);
         } else {
             VLOG_DBG_RL(LOG_MODULE, &rl, "Packet has invalid TTL, dropping.");
         }
         packet_destroy(pkt);
         return;
-    } */
+    }
 
     next_table = pl->tables[0];
 
@@ -422,19 +422,20 @@ execute_entry(struct pipeline *pl, struct flow_entry *entry,
                 *next_table = pl->tables[gi->table_id];
                 break;
             }
-            /*case OFPIT_WRITE_METADATA: {
+            case OFPIT_WRITE_METADATA: {
                 struct ofl_instruction_write_metadata *wi = (struct ofl_instruction_write_metadata *)inst;
-                struct ofl_match_standard *m;
+                struct ofl_match *m;
 
                 /* NOTE: Hackish solution. If packet had multiple handles, metadata
                  *       should be updated in all. 
+                 
                 packet_handle_std_validate(pkt->handle_std);
-                m = (struct ofl_match_standard *)pkt->handle_std->match;
-
+                m = (struct ofl_match *)pkt->handle_std->match;
+            
                 m->metadata =
                         (m->metadata & ~wi->metadata_mask) | (wi->metadata & wi->metadata_mask);
-                break;
-            }*/
+                break;*/
+            }
             case OFPIT_WRITE_ACTIONS: {
                 struct ofl_instruction_actions *wa = (struct ofl_instruction_actions *)inst;
 

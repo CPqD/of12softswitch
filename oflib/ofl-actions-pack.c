@@ -33,7 +33,7 @@
 #include <sys/types.h>
 #include <stdlib.h>
 #include <string.h>
-#include "lib/oxm-match.h"
+#include "oxm-match.h"
 #include "ofl.h"
 #include "ofl-utils.h"
 #include "ofl-actions.h"
