@@ -50,6 +50,8 @@ your /usr/local/lib directory. You should have root
 permission to do this.
 # mv libn*.so /usr/local/lib
 
+2 - Put the folder netbee-dev/nbee in the /usr/include
+# mv -r netbee-dev/nbee /usr/include
 
 2 - Run 
 # ldconfig  
