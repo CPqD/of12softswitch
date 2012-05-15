@@ -18,12 +18,53 @@ The following components are available in the release:
 Getting Started
 ---------------
 
+Dependencies
+============
+
+In order to compile the switch your 
+system must have the following libraries
+
+Libpcap 
+# sudo apt-get install libpcap
+# sudo apt-get install libpcap-dev
+----------------------------------------
+Xerces-C version 2.8.0
+# sudo apt-get install libxerces-c28
+# sudo apt-get install libxerces-c2-dev
+----------------------------------------
+libpcre
+# sudo apt-get install libpcre3
+# sudo apt-get install libpcre3-dev
+----------------------------------------
+A recent version of flex and bison
+# sudo apt-get install flex
+# sudo apt-get install bison
+
+Pre-Building
+============
+
+You should follow this steps before building 
+
+1 - Add the shared libraries present in netbee-dev to 
+your /usr/local/lib directory. You should have root 
+permission to do this.
+# mv libn*.so /usr/local/lib
+
+
+2 - Run 
+# ldconfig  
+
+Building
+========
+
 To build, run the following commands in the of11softswitch directory:
 
     ./boot.sh
     ./configure
     make
 
+Running
+=======
 
 To start the datapath, run the following commands:
 
@@ -33,7 +74,6 @@ To start the datapath, run the following commands:
 This will start the datapath, with the given datapath id, and interace list,
 opening a passive tcp connection on the given port. For a complete list of
 options, use the --help argument.
-
 
 To start the secure channel, run the following commands:
 
