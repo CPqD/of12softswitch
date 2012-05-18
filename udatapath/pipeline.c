@@ -134,7 +134,6 @@ pipeline_process_packet(struct pipeline *pl, struct packet *pkt) {
     }
 
     next_table = pl->tables[0];
-
     while (next_table != NULL) {
         struct flow_entry *entry;
 

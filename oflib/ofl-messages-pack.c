@@ -517,16 +517,16 @@ static int
 ofl_msg_pack_stats_reply_flow(struct ofl_msg_stats_reply_flow *msg, uint8_t **buf, size_t *buf_len, struct ofl_exp *exp) {
     struct ofp_stats_reply *resp;
     size_t i;
-    uint8_t *data;
+    uint8_t * data;
 
     *buf_len = sizeof(struct ofp_stats_reply) + ofl_structs_flow_stats_ofp_total_len(msg->stats, msg->stats_num, exp);
     *buf     = (uint8_t *)malloc(*buf_len);
     resp = (struct ofp_stats_reply *)(*buf);
-    data = (uint8_t *)resp->body;
+    int len = 0;
+    data = (uint8_t*) resp->body; 
     for (i=0; i<msg->stats_num; i++) {
-        data += ofl_structs_flow_stats_pack(msg->stats[i], data, exp);        
+        data += ofl_structs_flow_stats_pack(msg->stats[i], data, exp);
     }
-    
     return 0;
 }
 

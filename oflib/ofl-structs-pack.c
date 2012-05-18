@@ -241,10 +241,10 @@ ofl_structs_flow_stats_pack(struct ofl_flow_stats *src, uint8_t *dst, struct ofl
     total_len = ROUND_UP(sizeof(struct ofp_flow_stats) -4 + src->match->length,8) +
                 ofl_structs_instructions_ofp_total_len(src->instructions, src->instructions_num, exp);
     
-    dst = (uint8_t *)malloc(total_len);
+    *dst = (uint8_t *) malloc(total_len);
     flow_stats = (struct ofp_flow_stats*) dst;
+
     flow_stats->length = htons(total_len);
-    
     flow_stats->table_id = src->table_id;
     flow_stats->pad = 0x00;
     flow_stats->duration_sec = htonl(src->duration_sec);
@@ -256,15 +256,15 @@ ofl_structs_flow_stats_pack(struct ofl_flow_stats *src, uint8_t *dst, struct ofl
     flow_stats->cookie = hton64(src->cookie);
     flow_stats->packet_count = hton64(src->packet_count);
     flow_stats->byte_count = hton64(src->byte_count);
-    
     data = (dst) + sizeof(struct ofp_flow_stats) - 4;
+    
     ofl_structs_match_pack(src->match, &(flow_stats->match), data, exp);
     data = (dst) + ROUND_UP(sizeof(struct ofp_flow_stats) -4 + src->match->length, 8);  
     
     for (i=0; i < src->instructions_num; i++) {
         data += ofl_structs_instructions_pack(src->instructions[i], (struct ofp_instruction *) data, exp);
     }
-   
+    struct ofp_flow_stats *f = (struct ofp_flow_stats *) dst;
     return total_len;
 }
 

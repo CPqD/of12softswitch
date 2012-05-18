@@ -281,7 +281,6 @@ ofl_msg_unpack_flow_removed(struct ofp_header *src,uint8_t *buf, size_t *len, st
         }
         return ofl_error(OFPET_BAD_ACTION, OFPBAC_BAD_ARGUMENT);
     }
-    printf("LEN %d\n", *len);
     *len -=  sizeof(struct ofp_flow_removed) - sizeof(struct ofp_match) ;
 
     dr = (struct ofl_msg_flow_removed *)malloc(sizeof(struct ofl_msg_flow_removed));
@@ -308,7 +307,6 @@ ofl_msg_unpack_flow_removed(struct ofp_header *src,uint8_t *buf, size_t *len, st
         free(dr);
         return error;
     }
-    printf(" LEN %d\n", *len );
     *msg = (struct ofl_msg_header *)dr;
     return 0;
 }

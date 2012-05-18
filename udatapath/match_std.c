@@ -251,7 +251,6 @@ packet_match(struct ofl_match *flow_match, struct ofl_match *packet){
                             }
                         break;
                     }
-                                printf("Here\n");           
                
             }
         }

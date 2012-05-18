@@ -75,7 +75,6 @@ set_field(struct packet *pkt, struct ofl_action_set_field *act ) {
         struct packet_fields *iter;
         bool found=0;
         /* Search field on the description of the packet. */
-        printf("ACT->FIELD %d %d\n", act->field,OXM_OF_TCP_SRC);
         HMAP_FOR_EACH_WITH_HASH(iter,struct packet_fields, hmap_node, hash_int(act->field,0), &pkt->handle_std->match.match_fields)
     	{
             /* Found the field, lets re-write it!! */
