@@ -241,7 +241,6 @@ ofl_structs_flow_stats_pack(struct ofl_flow_stats *src, uint8_t *dst, struct ofl
     total_len = ROUND_UP(sizeof(struct ofp_flow_stats) -4 + src->match->length,8) +
                 ofl_structs_instructions_ofp_total_len(src->instructions, src->instructions_num, exp);
     
-    *dst = (uint8_t *) malloc(total_len);
     flow_stats = (struct ofp_flow_stats*) dst;
 
     flow_stats->length = htons(total_len);
@@ -557,6 +556,7 @@ ofl_structs_match_pack(struct ofl_match_header *src, struct ofp_match *dst, uint
                 oxm_len = oxm_put_match(b, m);
                 memcpy(oxm_fields, (uint8_t*) ofpbuf_pull(b,oxm_len), oxm_len);
                 dst->length = htons(oxm_len + ((sizeof(struct ofp_match )-4)));
+                ofpbuf_delete(b);
                 return ntohs(dst->length);
             }
             else return 0;

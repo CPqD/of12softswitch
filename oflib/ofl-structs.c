@@ -324,8 +324,16 @@ void
 ofl_structs_free_match(struct ofl_match_header *match, struct ofl_exp *exp) {
     switch (match->type) {
         case (OFPMT_OXM): {
-            
+            /*struct ofl_match *m = (struct ofl_match*) match;
+            struct ofl_match_tlv *tlv;
+            printf("freein\n");
+            HMAP_FOR_EACH(tlv, struct ofl_match_tlv, hmap_node, &m->match_fields){
+                
+                free(tlv->value);
+            }
+            hmap_destroy(&m->match_fields);*/
             free(match);
+            
             break;
         }
         default: {

@@ -633,8 +633,7 @@ ofl_msg_unpack_stats_request_flow(struct ofp_stats_request *os,uint8_t* buf, siz
     dm->cookie = ntoh64(sm->cookie);
     dm->cookie_mask = ntoh64(sm->cookie_mask);
 
-    match_pos = sizeof(struct ofp_flow_stats_request) - 4;
-
+    match_pos = sizeof(struct ofp_stats_request) + sizeof(struct ofp_flow_stats_request) - 4;
     error = ofl_structs_match_unpack(&(sm->match),buf + match_pos, len, &(dm->match), exp);
     if (error) {
         free(dm);
