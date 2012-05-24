@@ -75,10 +75,10 @@ set_field(struct packet *pkt, struct ofl_action_set_field *act ) {
         struct packet_fields *iter;
         bool found=0;
         /* Search field on the description of the packet. */
-        HMAP_FOR_EACH_WITH_HASH(iter,struct packet_fields, hmap_node, hash_int(act->field,0), &pkt->handle_std->match.match_fields)
+        HMAP_FOR_EACH_WITH_HASH(iter,struct packet_fields, hmap_node, hash_int(act->field->header,0), &pkt->handle_std->match.match_fields)
     	{
             /* Found the field, lets re-write it!! */
-    	    memcpy(((uint8_t*)pkt->buffer->data + iter->pos) , act->value , OXM_LENGTH(iter->header));
+    	    memcpy(((uint8_t*)pkt->buffer->data + iter->pos) , act->field->value , OXM_LENGTH(iter->header));
     	    
     	    found=1;
     	}

@@ -272,13 +272,13 @@ ofl_actions_unpack(struct ofp_action_header *src, size_t *len, struct ofl_action
             
             sa = (struct ofp_action_set_field*) src;
             da = (struct ofl_action_set_field *)malloc(sizeof(struct ofl_action_set_field));
-       
-            memcpy(&da->field,sa->field,4);
+            da->field = (struct ofl_match_tlv*) malloc(sizeof(struct ofl_match_tlv));
+            
+            memcpy(&da->field->header,sa->field,4);
             
             uint8_t *value = (uint8_t *) src + sizeof (struct ofp_action_set_field);
-            da->len = 4 + OXM_LENGTH(da->field);
-            da->value = malloc(OXM_LENGTH(da->field));
-            memcpy(da->value , value, OXM_LENGTH(da->field));
+            da->field->value = malloc(OXM_LENGTH(da->field->header));
+            memcpy(da->field->value , value, OXM_LENGTH(da->field->header));
      	    *len -= ROUND_UP(ntohs(src->len),8);
      	    *dst = (struct ofl_action_header *)da;
             break;

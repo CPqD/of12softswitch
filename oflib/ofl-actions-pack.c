@@ -77,7 +77,7 @@ ofl_actions_ofp_len(struct ofl_action_header *action, struct ofl_exp *exp) {
             return sizeof(struct ofp_action_header);
         case OFPAT_SET_FIELD: {
             struct ofl_action_set_field  *a = (struct ofl_action_set_field  *) action;  
-            return ROUND_UP(sizeof(struct ofp_action_set_field) -4 + a->len,8) ;
+            return sizeof(struct ofp_action_set_field) + ROUND_UP(OXM_LENGTH(a->field->header),8) ;
         }    
         case OFPAT_EXPERIMENTER: {
             if (exp == NULL || exp->act == NULL || exp->act->ofp_len == NULL) {
@@ -195,11 +195,10 @@ ofl_actions_pack(struct ofl_action_header *src, struct ofp_action_header *dst, u
             struct ofl_action_set_field *sa = (struct ofl_action_set_field *) src;
             struct ofp_action_set_field *da = (struct ofp_action_set_field *) dst;
 
-            da->len = htons(sizeof(struct ofp_action_set_field) + ROUND_UP(OXM_LENGTH(sa->field),8));
-            memset(data + (sizeof(struct ofp_action_set_field)- 4),0,ntohs(da->len));
+            da->len = htons(sizeof(struct ofp_action_set_field) + ROUND_UP(OXM_LENGTH(sa->field->header),8));
             /*Put OXM header in the field*/
-            memcpy(da->field, &sa->field, 4);            
-            memcpy(data + (sizeof(struct ofp_action_set_field)), sa->value,OXM_LENGTH(sa->field));
+            memcpy(&da->field, &sa->field->header, 4);            
+            memcpy(data + (sizeof(struct ofp_action_set_field)), sa->field->value,OXM_LENGTH(sa->field->header));
             return ntohs((da->len));
         
         }

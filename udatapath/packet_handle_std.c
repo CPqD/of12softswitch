@@ -83,7 +83,7 @@ packet_handle_std_create(struct packet *pkt) {
 	
 	handle->valid = false;
 	packet_handle_std_validate(handle);
-
+        
 	return handle;
 }
 
@@ -146,6 +146,7 @@ packet_handle_std_match(struct packet_handle_std *handle, struct ofl_match *matc
             return false;
         }
     }
+
     return packet_match(match ,&handle->match );
 }
 

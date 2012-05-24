@@ -50,6 +50,8 @@
 #include "util.h"
 #include "oflib/oxm-match.h"
 #include "vlog.h"
+//remover depois
+#include "hash.h"
 
 
 #define LOG_MODULE VLM_pipeline
@@ -80,6 +82,8 @@ pipeline_create(struct datapath *dp) {
     return pl;
 }
 
+
+
 /* Sends a packet to the controller in a packet_in message */
 static void
 send_packet_to_controller(struct pipeline *pl, struct packet *pkt, uint8_t table_id, uint8_t reason) {
@@ -102,7 +106,6 @@ send_packet_to_controller(struct pipeline *pl, struct packet *pkt, uint8_t table
             ports                                 */
         ofl_structs_match_put32(m,OXM_OF_IN_PORT,pkt->in_port);
         ofl_structs_match_put32(m,OXM_OF_IN_PHY_PORT,pkt->in_port);
-
         
         msg.match = (struct ofl_match_header*)m;
         
@@ -142,7 +145,7 @@ pipeline_process_packet(struct pipeline *pl, struct packet *pkt) {
         pkt->table_id = next_table->stats->table_id;
         table         = next_table;
         next_table    = NULL;
-
+        
         entry = flow_table_lookup(table, pkt);
 
         if (entry != NULL) {

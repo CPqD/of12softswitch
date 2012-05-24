@@ -99,9 +99,7 @@ struct ofl_action_set_nw_ttl {
 
 struct ofl_action_set_field {
     struct ofl_action_header   header; /* OFPAT_SET_FIELD. */
-    uint16_t len;   /*Size of the OXM TLV */ 
-    uint32_t field; /* Field to be modified */
-    uint8_t *value;   /* New value */
+    struct ofl_match_tlv *field;
 };
 
 struct ofl_action_experimenter {

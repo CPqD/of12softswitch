@@ -534,6 +534,9 @@ ofl_structs_match_to_string(struct ofl_match_header *match, struct ofl_exp *exp)
 void
 ofl_structs_match_print(FILE *stream, struct ofl_match_header *match, struct ofl_exp *exp);
 
+void
+print_oxm_tlv(FILE *stream, struct ofl_match_tlv *f, size_t *size);
+
 char *
 ofl_structs_config_to_string(struct ofl_config *c);
 

@@ -39,6 +39,7 @@
 #include "ofl-print.h"
 #include "ofl-actions.h"
 #include "ofl-packets.h"
+#include "../oflib/oxm-match.h"
 #include "openflow/openflow.h"
 
 
@@ -86,7 +87,9 @@ ofl_action_print(FILE *stream, struct ofl_action_header *act, struct ofl_exp *ex
         }
         case OFPAT_SET_FIELD:{
             struct ofl_action_set_field *a = (struct ofl_action_set_field *)act;
-            fprintf(stream, "{field:%d=%d",a->field, *a->value);
+            fprintf(stream, "{field:");
+            size_t size = 4 + OXM_LENGTH(a->field->header);
+            print_oxm_tlv(stream, a->field, &size);
             break;
         }
         case OFPAT_COPY_TTL_OUT:

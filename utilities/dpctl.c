@@ -1087,7 +1087,6 @@ parse_match(char *str, struct ofl_match_header **match) {
                 ofp_fatal(0, "Error parsing mpls_label: %s.", token);
             }
             else ofl_structs_match_put32(m,OXM_OF_MPLS_LABEL,mpls_label);
-            continue;
         }/*
         if (strncmp(token, MATCH_MPLS_TC KEY_VAL, strlen(MATCH_MPLS_TC KEY_VAL)) == 0) {
             if (parse8(token + strlen(MATCH_MPLS_TC KEY_VAL), NULL, 0, 0x07, &(m->mpls_tc))) {
@@ -1136,9 +1135,9 @@ parse_set_field(char *str, struct ofl_action_set_field *act) {
         if (parse_dl_addr(str + strlen(MATCH_DL_SRC KEY_VAL), dl_src)) {
                 ofp_fatal(0, "Error parsing dl_src: %s.", token);
         }else{ 
-                act->len = 10;
-                act->field = OXM_OF_ETH_SRC;                    
-                act->value = dl_src;
+                act->field = (struct ofl_match_tlv*) malloc(sizeof(struct ofl_match_tlv));
+                act->field->header = OXM_OF_ETH_SRC;                    
+                act->field->value = dl_src;
                }     
         }/*
     }
@@ -1179,15 +1178,18 @@ parse_set_field(char *str, struct ofl_action_set_field *act) {
                 ofp_fatal(0, "Error parsing vlan pcp: %s.", token);
             }
             continue;
-        }
-        if (strncmp(token, MATCH_DL_TYPE KEY_VAL, strlen(MATCH_DL_TYPE KEY_VAL)) == 0) {
-            uint16_t dl_type;
-            if (parse16(token + strlen(MATCH_DL_TYPE KEY_VAL), NULL, 0, 0xffff, &dl_type)) {
+        }*/
+        if (strncmp(str, MATCH_DL_TYPE KEY_VAL, strlen(MATCH_DL_TYPE KEY_VAL)) == 0) {
+            uint16_t* dl_type = xmalloc(2);
+            if (parse16(str + strlen(MATCH_DL_TYPE KEY_VAL), NULL, 0, 0xffff, dl_type)) {
                 ofp_fatal(0, "Error parsing dl_type: %s.", token);
             }
-            else 
-                ofl_structs_match_put16(m, OXM_OF_ETH_TYPE,dl_type);
-            continue;
+            else { 
+                act->field = (struct ofl_match_tlv*) malloc(sizeof(struct ofl_match_tlv));
+                act->field->header = OXM_OF_ETH_TYPE;
+                //*tp_src = htons(*tp_src);                    
+                act->field->value = (uint8_t*) dl_type;
+            }     
         }
         /*
         if (strncmp(token, MATCH_NW_TOS KEY_VAL, strlen(MATCH_NW_TOS KEY_VAL)) == 0) {
@@ -1236,10 +1238,11 @@ parse_set_field(char *str, struct ofl_action_set_field *act) {
             if (parse16(str + strlen(MATCH_TP_SRC KEY_VAL), NULL, 0, 0xffff, tp_src)) {
                 ofp_fatal(0, "Error parsing tp_src: %s.", token);
             }else{ 
-                act->len = 6;
-                act->field = OXM_OF_TCP_SRC;
+                act->field = (struct ofl_match_tlv*) malloc(sizeof(struct ofl_match_tlv));
+                act->field->header = OXM_OF_TCP_SRC;
                 //*tp_src = htons(*tp_src);                    
-                act->value = (uint8_t*) tp_src;
+                act->field->value = (uint8_t*) tp_src;
+
                }     
         }
     }/*
