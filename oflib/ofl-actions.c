@@ -42,8 +42,6 @@ OFL_LOG_INIT(LOG_MODULE)
 void
 ofl_actions_free(struct ofl_action_header *act, struct ofl_exp *exp) {
     switch (act->type) {
-        case OFPAT_OUTPUT:
-       
         case OFPAT_SET_FIELD:{
             struct ofl_action_set_field *a = (struct ofl_action_set_field*) act;
             //struct ofl_match_tlv *tlv = a->field;
@@ -54,6 +52,7 @@ ofl_actions_free(struct ofl_action_header *act, struct ofl_exp *exp) {
             return;
             break;        
         }
+        case OFPAT_OUTPUT:
         case OFPAT_COPY_TTL_OUT:
         case OFPAT_COPY_TTL_IN:
         case OFPAT_SET_MPLS_TTL:

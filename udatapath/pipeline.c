@@ -111,7 +111,6 @@ send_packet_to_controller(struct pipeline *pl, struct packet *pkt, uint8_t table
         
         dp_send_message(pl->dp, (struct ofl_msg_header *)&msg, NULL);
         ofl_structs_free_match((struct ofl_match_header* ) m, NULL);
-        free(m);
     }
     
 }
