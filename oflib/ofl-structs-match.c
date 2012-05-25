@@ -83,7 +83,7 @@ ofl_structs_match_put16(struct ofl_match *match, uint32_t header, uint16_t value
 
 void
 ofl_structs_match_put16m(struct ofl_match *match, uint32_t header, uint16_t value, uint16_t mask){
-   struct ofl_match_tlv *m = malloc(sizeof (struct ofl_match_tlv));
+    struct ofl_match_tlv *m = malloc(sizeof (struct ofl_match_tlv));
     int len = sizeof(uint16_t);
     
     m->header = header;
@@ -96,7 +96,7 @@ ofl_structs_match_put16m(struct ofl_match *match, uint32_t header, uint16_t valu
 
 void
 ofl_structs_match_put32(struct ofl_match *match, uint32_t header, uint32_t value){
-    struct ofl_match_tlv *m = malloc(sizeof (struct ofl_match_tlv));
+    struct ofl_match_tlv *m = xmalloc(sizeof (struct ofl_match_tlv));
 
     int len = sizeof(uint32_t);
     

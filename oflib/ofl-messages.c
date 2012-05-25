@@ -205,6 +205,7 @@ ofl_msg_free(struct ofl_msg_header *msg, struct ofl_exp *exp) {
             break;
         }
         case OFPT_PACKET_IN: {
+            ofl_structs_free_match(((struct ofl_msg_packet_in *)msg)->match,NULL);
             free(((struct ofl_msg_packet_in *)msg)->data);
             break;
         }

@@ -134,6 +134,7 @@ int nbee_extract_proto_fields(struct ofpbuf * pktin, _nbPDMLField * field, struc
             masked_field[i] = (uint8_t)((true_value >> (8*(field->Size-i-1)) ) & 0xFF);
         }            	
         memcpy(pktout_field->value,((uint8_t*)masked_field),field->Size);
+        free(masked_field);
     }
     else
     {

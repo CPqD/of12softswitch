@@ -44,6 +44,16 @@ ofl_actions_free(struct ofl_action_header *act, struct ofl_exp *exp) {
     switch (act->type) {
         case OFPAT_OUTPUT:
        
+        case OFPAT_SET_FIELD:{
+            struct ofl_action_set_field *a = (struct ofl_action_set_field*) act;
+            //struct ofl_match_tlv *tlv = a->field;
+            //printf("a->field->header %d\n",tlv->header); 
+            free(a->field->value);
+            free(a->field);
+            free(a);
+            return;
+            break;        
+        }
         case OFPAT_COPY_TTL_OUT:
         case OFPAT_COPY_TTL_IN:
         case OFPAT_SET_MPLS_TTL:
@@ -55,7 +65,6 @@ ofl_actions_free(struct ofl_action_header *act, struct ofl_exp *exp) {
         case OFPAT_SET_QUEUE:
         case OFPAT_GROUP:
         case OFPAT_SET_NW_TTL:
-        case OFPAT_SET_FIELD:
         case OFPAT_DEC_NW_TTL: {
             break;
         }
