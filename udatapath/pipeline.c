@@ -106,9 +106,10 @@ send_packet_to_controller(struct pipeline *pl, struct packet *pkt, uint8_t table
             ports                                 */
         ofl_structs_match_put32(m,OXM_OF_IN_PORT,pkt->in_port);
         ofl_structs_match_put32(m,OXM_OF_IN_PHY_PORT,pkt->in_port);
+        struct ofl_match_tlv *oft;
+        m->header.length += ofl_structs_match_convert_pktf2oflm(&pkt->handle_std->match.match_fields, &m->match_fields);
         
         msg.match = (struct ofl_match_header*)m;
-        
         dp_send_message(pl->dp, (struct ofl_msg_header *)&msg, NULL);
         ofl_structs_free_match((struct ofl_match_header* ) m, NULL);
     }

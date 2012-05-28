@@ -32,7 +32,7 @@
 #include "ofl-structs.h"
 #include "lib/hash.h"
 #include "oxm-match.h"
-
+#include "../nbee_link/nbee_link.h"
 
 void
 ofl_structs_match_init(struct ofl_match *match){
@@ -176,7 +176,8 @@ ofl_structs_match_put_eth_m(struct ofl_match *match, uint32_t header, uint8_t va
 
 }
 
-void ofl_structs_match_put_ipv6(struct ofl_match *match, uint32_t header, const struct in6_addr *value){
+void 
+ofl_structs_match_put_ipv6(struct ofl_match *match, uint32_t header, const struct in6_addr *value){
 
     struct ofl_match_tlv *m = malloc(sizeof (struct ofl_match_tlv));
     int len = sizeof(struct in6_addr);
@@ -189,7 +190,8 @@ void ofl_structs_match_put_ipv6(struct ofl_match *match, uint32_t header, const 
 
 }
 
-void ofl_structs_match_put_ipv6m(struct ofl_match *match, uint32_t header, const struct in6_addr *value, const struct in6_addr *mask){
+void 
+ofl_structs_match_put_ipv6m(struct ofl_match *match, uint32_t header, const struct in6_addr *value, const struct in6_addr *mask){
     struct ofl_match_tlv *m = malloc(sizeof (struct ofl_match_tlv));
     int len = sizeof(struct in6_addr);
     
@@ -201,4 +203,27 @@ void ofl_structs_match_put_ipv6m(struct ofl_match *match, uint32_t header, const
     match->header.length += len*2 + 4;
 
 }
+
+size_t 
+ofl_structs_match_convert_pktf2oflm(struct hmap * hmap_packet_fields, struct hmap * hmap_ofl_match)
+/*
+* Used to convert between a hmap of "struct packet_fields" to "struct ofl_match"
+*/
+{
+    struct packet_fields *iter;
+    size_t len = 0;
+    HMAP_FOR_EACH(iter,struct packet_fields, hmap_node, hmap_packet_fields)
+    {
+        struct ofl_match_tlv * new_entry = (struct ofl_match_tlv *) malloc(sizeof(struct ofl_match_tlv));
+        
+        new_entry->header = iter->header;
+        new_entry->value = (uint8_t *) malloc(OXM_LENGTH(new_entry->header));
+        
+        memcpy(new_entry->value, iter->value,OXM_LENGTH(new_entry->header));
+        len += OXM_LENGTH(new_entry->header) + 4;
+        hmap_insert_fast(hmap_ofl_match, &new_entry->hmap_node,hash_int(new_entry->header, 0));
+    }
+    return len;
+}
+
 
