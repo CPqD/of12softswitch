@@ -4125,7 +4125,7 @@ Please note: it was this before
 
 	<format>
 		<fields>
-			<field type="bit" name="ver" longname="{0x8000 10} Version" mask="0xF0" size="1" showtemplate="FieldDec"/>
+			<field type="bit" name="ver" longname="Version" mask="0xF0" size="1" showtemplate="FieldDec"/>
 			<field type="bit" name="hlen" longname="Header length" comment="The length is in multiple of 4 bytes" mask="0x0F" size="1" showtemplate="FieldMul4Dec"/>
 			<!-- <field type="fixed" name="tos" longname="{0x8000 8} Type of service" size="1" showtemplate="FieldHex"/> -->
 			<block name="tos" longname="Type of service">
@@ -4141,7 +4141,7 @@ Please note: it was this before
 				<field type="bit" name="foffset" longname="Fragment offset" comment="This is in multiple of 8 bytes" mask="0x1FFF" size="2" showtemplate="ShortMul8Dec"/>
 			</block>
 			<field type="fixed" name="ttl" longname="{0x0002 81} Time to live" size="1" showtemplate="FieldDec"/>
-			<field type="fixed" name="nextp" longname="Next protocol" size="1" showtemplate="FieldDec"/>
+			<field type="fixed" name="nextp" longname="{0x8000 10} Next protocol" size="1" showtemplate="FieldDec"/>
 			<field type="fixed" name="hchecksum" longname="Header Checksum" size="2" showtemplate="FieldHex"/>
 			<field type="fixed" name="src" longname="{0x8000 11}" size="4" showtemplate="ip4addr"/>
 			<field type="fixed" name="dst" longname="{0x8000 12}" size="4" showtemplate="ip4addr"/>
@@ -4555,7 +4555,7 @@ Please note: it was this before
 			<field type="bit" name="tos" longname="Type of service" mask="0x0F000000" size="4" showtemplate="FieldHex"/>
 			<field type="bit" name="flabel" longname="{0x8000 28}" mask="0x00FFFFFF" size="4" showtemplate="FieldHex"/>
 			<field type="fixed" name="plen" longname="Payload Length" size="2" showtemplate="FieldDec"/>
-			<field type="fixed" name="nexthdr" longname="Next Header" size="1" showtemplate="ipv6.nexthdr"/>
+			<field type="fixed" name="nexthdr" longname="{0x8000 10} Next Header" size="1" showtemplate="ipv6.nexthdr"/>
 			<field type="fixed" name="hop" longname="Hop limit" size="1" showtemplate="FieldDec"/>
 			<field type="fixed" name="src" longname="{0x8000 26}" size="16" showtemplate="ip6addr" />
 			<field type="fixed" name="dst" longname="{0x8000 27}" size="16" showtemplate="ip6addr" />
@@ -4587,7 +4587,7 @@ Please note: it was this before
 
 
 		<block name="HBH" longname="{0x0002 8}">
-			<field type="fixed" name="nexthdr" longname="Next Header" size="1" showtemplate="ipv6.nexthdr"/>
+			<field type="fixed" name="nexthdr" longname="{0x8000 10} Next Header" size="1" showtemplate="ipv6.nexthdr"/>
 			<field type="fixed" name="helen" longname="Length (multiple of 8 bytes, not including the first 8)" size="1" showtemplate="ipv6.hbhlen"/>
 			<loop type="size" expr="(buf2int(helen) * 8) + 6">	<!-- '6' because the first two bytes are nexthdr and helen -->
 				<includeblk name="HBHOption"/>
@@ -4595,7 +4595,7 @@ Please note: it was this before
 		</block>
 
 		<block name="FH" longname="{0x0002 32}">
-			<field type="fixed" name="nexthdr" longname="Next Header" size="1" showtemplate="ipv6.nexthdr"/>
+			<field type="fixed" name="nexthdr" longname="{0x8000 10} Next Header" size="1" showtemplate="ipv6.nexthdr"/>
 			<field type="fixed" name="reserved" longname="Reserved (multiple of 8 bytes)" comment="This is in multiple of 8 bytes" size="1" showtemplate="FieldDec"/>
 			<field type="bit" name="fragment offset" longname="Fragment Offset" mask="0xFFF0" size="2" showtemplate="FieldDec"/>
 			<field type="bit" name="res" longname="Res" mask="0x0004" size="2" showtemplate="FieldHex"/>
@@ -4604,7 +4604,7 @@ Please note: it was this before
 		</block>
 
 		<block name="AH" longname="{0x0002 40}">
-			<field type="fixed" name="nexthdr" longname="Next Header" size="1" showtemplate="ipv6.nexthdr"/>
+			<field type="fixed" name="nexthdr" longname="{0x8000 10} Next Header" size="1" showtemplate="ipv6.nexthdr"/>
 			<field type="fixed" name="payload len" longname="Payload Len" size="1" showtemplate="FieldDec"/>
 			<field type="fixed" name="reserved" longname="Reserved" size="2" showtemplate="FieldDec"/>
 			<field type="fixed" name="spi" longname="Security Parameters Index" size="4" showtemplate="FieldDec"/>
@@ -4612,7 +4612,7 @@ Please note: it was this before
 		</block>
 
 		<block name="DOH" longname="{0x0002 16}">
-			<field type="fixed" name="nexthdr" longname="Next Header" size="1" showtemplate="ipv6.nexthdr"/>
+			<field type="fixed" name="nexthdr" longname="{0x8000 10} Next Header" size="1" showtemplate="ipv6.nexthdr"/>
 			<field type="fixed" name="helen" longname="Length (multiple of 8 bytes, not including the first 8)" size="1" showtemplate="ipv6.hbhlen"/>
 			<loop type="size" expr="(buf2int(helen) * 8)+6"> <!-- '6' because the first two bytes are nexthdr and helen -->
 				<includeblk name="DOHOption"/>
@@ -4620,7 +4620,7 @@ Please note: it was this before
 		</block>
 
 		<block name="RH" longname="{0x0002 24}">
-			<field type="fixed" name="nexthdr" longname="Next Header" size="1" showtemplate="ipv6.nexthdr"/>
+			<field type="fixed" name="nexthdr" longname="{0x8000 10} Next Header" size="1" showtemplate="ipv6.nexthdr"/>
 			<field type="fixed" name="hlen" longname="Length (multiple of 8 bytes)" comment="This is in multiple of 8 bytes" size="1" showtemplate="FieldDec"/>	
 			<field type="fixed" name="rtype" longname="Routing Type" size="1" showtemplate="FieldDec"/>
 			<field type="fixed" name="segment left" longname="Segment Left" size="1" showtemplate="FieldDec"/>
@@ -4905,9 +4905,27 @@ Please note: it was this before
 					<field type="fixed" name="checksum" longname="Checksum" size="2" showtemplate="FieldHex"/>
 					<includeblk name="INDA"/>
 				</case>
+				<case value="143">
+					<field type="fixed" name="code" longname="{0x8000 30} Code" size="1" showtemplate="FieldDec"/>
+					<field type="fixed" name="checksum" longname="Checksum" size="2" showtemplate="FieldHex"/>
+					<field type="fixed" name="res" longname="Reserved" size="2" showtemplate="FieldDec"/>
+					<field type="fixed" name="nmult" longname="Number of MultiCast" size="2" showtemplate="FieldDec"/>
+					<loop type="times2repeat" expr="buf2int(nmult)">
+					    <includeblk name="MultAddRec"/>
+					</loop>
+				</case>
 			</switch>
 		</fields>
 
+        <block name="MultAddRec" longname="Multi-cast Address Record">
+            <field type="fixed" name="rectype" longname="Record Type" size="1" showtemplate="FieldDec"/>
+            <field type="fixed" name="auxdata" longname="Auxiliar Data" size="1" showtemplate="FieldDec"/>
+		    <field type="fixed" name="nsrcs" longname="Number of sources" size="2" showtemplate="FieldDec"/>
+		    <field type="fixed" name="maddress" longname="IPv6 Multicast Address" size="16" showtemplate="ip6addr"/>
+		    <loop type="times2repeat" expr="buf2int(nsrcs)">
+		        <field type="fixed" name="address" longname="IPv6 Src Address" size="16" showtemplate="ip6addr"/>
+            </loop>
+        </block>
 		<block name="Error" longname="Error Packet">
 			<field type="fixed" name="unused" size="4" longname="Unused" showtemplate="FieldHex"/>
 			<!-- Here you can find the fragment of the IPv6 packet that caused the error -->

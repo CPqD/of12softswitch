@@ -153,7 +153,7 @@ oxm_prereqs_ok(const struct oxm_field *field, const struct ofl_match *rule)
               memcpy(&eth_type, omt->value, sizeof(uint16_t));
               if (ntohs(field->dl_type[0]) == eth_type) {
                 return true;
-              } else if (ntohs(field->dl_type[1]) && field->dl_type[1] == eth_type) {
+              } else if (ntohs(field->dl_type[1]) && ntohs(field->dl_type[1]) == eth_type) {
                 return true;
               }
         }
@@ -187,7 +187,7 @@ static uint8_t* get_oxm_value(struct ofl_match *m, uint32_t header){
 static int
 parse_oxm_entry(struct ofl_match *match, const struct oxm_field *f,
                 const void *value, const void *mask){
-  
+
     switch (f->index) {
         case OFI_OXM_OF_IN_PORT: {
             ofl_structs_match_put32(match, f->header, get_unaligned_u32(value));
@@ -300,14 +300,18 @@ parse_oxm_entry(struct ofl_match *match, const struct oxm_field *f,
             return 0;
           
         case OFI_OXM_OF_IPV6_SRC_W:
-        case OFI_OXM_OF_IPV6_DST_W:
+        case OFI_OXM_OF_IPV6_DST_W:{
             ofl_structs_match_put_ipv6m(match, f->header,(struct in6_addr*) value,(struct in6_addr*) mask);
-        
-        case OFI_OXM_OF_IPV6_FLABEL:
+            return 0;
+        }
+        case OFI_OXM_OF_IPV6_FLABEL:{
             ofl_structs_match_put32(match, f->header, get_unaligned_u32(value));
-           
-        case OFI_OXM_OF_IPV6_FLABEL_W:
+            return 0;  
+        }
+        case OFI_OXM_OF_IPV6_FLABEL_W:{
             ofl_structs_match_put32m(match, f->header, get_unaligned_u32(value),get_unaligned_u32(mask));
+            return 0;
+        }
         /* TCP header. */
         case OFI_OXM_OF_TCP_SRC:
         case OFI_OXM_OF_TCP_DST:
@@ -326,16 +330,17 @@ parse_oxm_entry(struct ofl_match *match, const struct oxm_field *f,
             /* ICMPv6 header. */
         case OFI_OXM_OF_ICMPV6_TYPE:
         case OFI_OXM_OF_ICMPV6_CODE:
-            ofl_structs_match_put8(match, f->header, htons(*(uint8_t *) value));
-            break;
+                ofl_structs_match_put8(match, f->header, htons(*(uint8_t *) value));
+                return 0;
             
             /* IPv6 Neighbor Discovery. */
         case OFI_OXM_OF_IPV6_ND_TARGET:
             ofl_structs_match_put_ipv6(match, f->header,(struct in6_addr*) value);
+            return 0;
         case OFI_OXM_OF_IPV6_ND_SLL:
         case OFI_OXM_OF_IPV6_ND_TLL:
             ofl_structs_match_put_eth(match, f->header,(uint8_t* )value);          
-
+            return 0;
             /* ARP header. */
         case OFI_OXM_OF_ARP_OP:{
             uint8_t *v = (uint8_t*) value;
@@ -345,10 +350,9 @@ parse_oxm_entry(struct ofl_match *match, const struct oxm_field *f,
                 ofl_structs_match_put8(match, f->header, *v);
             return 0;
         }
-
         case OFI_OXM_OF_MPLS_LABEL:
                 ofl_structs_match_put32(match, f->header, get_unaligned_u32(value));
-            
+                return 0;
         case OFI_OXM_OF_MPLS_TC:{
             uint8_t *v = (uint8_t*) value;
             ofl_structs_match_put8(match, f->header, *v);
@@ -381,7 +385,6 @@ oxm_pull_match(struct ofpbuf *buf, struct ofl_match * match_dst, int match_len)
         
         return ofp_mkerr(OFPET_BAD_MATCH, OFPBRC_BAD_LEN);
     }
-    
     ofl_structs_match_init(match_dst);
     while ((header = oxm_entry_ok(p, match_len)) != 0) {
         

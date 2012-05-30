@@ -161,8 +161,8 @@
 #define OXM_OF_IPV6_DST_W OXM_HEADER_W(0x8000, 27, 16)
 
 /* IPv6 flow label*/
-#define OXM_OF_IPV6_FLABEL   OXM_HEADER (0x8000, 28, 3)
-#define OXM_OF_IPV6_FLABEL_W OXM_HEADER_W (0x8000, 28, 3)
+#define OXM_OF_IPV6_FLABEL   OXM_HEADER (0x8000, 28, 4)
+#define OXM_OF_IPV6_FLABEL_W OXM_HEADER_W (0x8000, 28, 4)
 
 /* ICMPv6 message type field */
 #define OXM_OF_ICMPV6_TYPE OXM_HEADER (0x8000, 29, 1) 
@@ -180,7 +180,7 @@
 #define OXM_OF_IPV6_ND_TLL   OXM_HEADER (0x8000, 33, 6)  
 
 /* MPLS label. */
-#define OXM_OF_MPLS_LABEL OXM_HEADER (0x8000, 34, 3)
+#define OXM_OF_MPLS_LABEL OXM_HEADER (0x8000, 34, 4)
 
 /* MPLS TC. */
 #define OXM_OF_MPLS_TC OXM_HEADER     (0x8000, 35, 1)

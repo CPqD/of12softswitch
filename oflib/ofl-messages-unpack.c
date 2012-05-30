@@ -245,12 +245,14 @@ ofl_msg_unpack_packet_in(struct ofp_header *src, uint8_t* buf, size_t *len, stru
     dp->total_len = ntohs(sp->total_len);
     dp->reason = (enum ofp_packet_in_reason)sp->reason;
     dp->table_id = sp->table_id;
-    dp->data_length = *len;
+    
     
     ptr = buf + (sizeof(struct ofp_packet_in)-4);
     ofl_structs_match_unpack(&(sp->match),ptr,len,&(dp->match),NULL);
     
-    ptr = buf + ROUND_UP(sizeof(struct ofp_packet_in)-4 + sp->match.length,8);
+    ptr = buf + ROUND_UP(sizeof(struct ofp_packet_in)-4 + dp->match->length,8);
+    *len -= ROUND_UP(sizeof(struct ofp_packet_in)-4 + dp->match->length,8);
+    dp->data_length = *len;
     dp->data = *len > 0 ? (uint8_t *)memcpy(malloc(*len), ptr, *len) : NULL;
     *len = 0;
 
