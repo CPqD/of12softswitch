@@ -548,7 +548,6 @@ ofl_structs_match_pack(struct ofl_match_header *src, struct ofp_match *dst, uint
             struct ofl_match *m = (struct ofl_match *)src;
             struct ofpbuf *b = ofpbuf_new(0);
             int oxm_len;
-            
             dst->type = htons(m->header.type);
             oxm_fields = (uint8_t*) &dst->oxm_fields;
             dst->length = htons(sizeof(struct ofp_match));

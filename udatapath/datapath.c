@@ -432,7 +432,6 @@ dp_send_message(struct datapath *dp, struct ofl_msg_header *msg,
         VLOG_WARN_RL(LOG_MODULE, &rl, "There was an error packing the message!");
         return error;
     }
-
     ofpbuf = ofpbuf_new(0);
     ofpbuf_use(ofpbuf, buf, buf_size);
     ofpbuf_put_uninit(ofpbuf, buf_size);

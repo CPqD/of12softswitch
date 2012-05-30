@@ -618,12 +618,8 @@ dp_actions_output_port(struct packet *pkt, uint32_t out_port, uint32_t out_queue
                 /* In this implementation the fields in_port and in_phy_port 
                 always will be the same, because we are not considering logical
                 ports                                 */
-                ofl_structs_match_put32(m,OXM_OF_IN_PORT,pkt->in_port);
-                ofl_structs_match_put32(m,OXM_OF_IN_PHY_PORT,pkt->in_port);
-                
-                m->header.length += ofl_structs_match_convert_pktf2oflm(&pkt->handle_std->match.match_fields, &m->match_fields);
-        
-                msg.match = (struct ofl_match_header*)m;                
+                ofl_structs_match_convert_pktf2oflm(&pkt->handle_std->match.match_fields, m);
+                msg.match = (struct ofl_match_header*)m;
                 dp_send_message(pkt->dp, (struct ofl_msg_header *)&msg, NULL);
                 ofl_structs_free_match((struct ofl_match_header* ) m, NULL);
             }

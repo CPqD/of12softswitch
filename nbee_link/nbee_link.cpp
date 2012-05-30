@@ -79,7 +79,7 @@ int nblink_add_entry_hmap(struct ofpbuf * pktin, struct hmap * pktout ,struct pa
     bool done=0;
     HMAP_FOR_EACH(iter,struct packet_fields, hmap_node,pktout)
     {
-        if(iter->header == pktout_field->header && iter->header == OXM_OF_ETH_TYPE)
+        if(iter->header == pktout_field->header)
         {
             /* Adding entry to existing hash entry (for now, do this only to ethertype)*/
             memcpy(iter->value,((uint8_t*)pktin->data + pktout_field->pos),Size);
@@ -140,7 +140,6 @@ int nbee_extract_proto_fields(struct ofpbuf * pktin, _nbPDMLField * field, struc
     {
        memcpy(pktout_field->value,((uint8_t*)pktin->data + field->Position),field->Size);
     }
-
     nblink_add_entry_hmap(pktin,pktout,pktout_field,size);
     
     return 0;         	
@@ -171,6 +170,7 @@ extern "C" int nblink_packet_parse(struct ofpbuf * pktin,  struct hmap * pktout,
     while (1)
     {
         /* Getting first field of the protocol  */
+        
         if(proto_done)
         {
             field = proto->FirstField;
@@ -209,7 +209,6 @@ extern "C" int nblink_packet_parse(struct ofpbuf * pktin,  struct hmap * pktout,
                 pkt_proto->arp = (struct arp_eth_header *) ((uint8_t*) pktin->data + proto->Position);
             }
             /* ============== end ================ */
-            /* I'm serious... there should be another way of doing this.... */
             while (!field->isField)
             {
             // This is necessary for Protocols with a Block as a first "field" on NetBee,
@@ -217,7 +216,6 @@ extern "C" int nblink_packet_parse(struct ofpbuf * pktin,  struct hmap * pktout,
                 field = field->FirstChild;
             }
         }
-        
 
         if ((char)field->LongName[0]=='{')
         {
@@ -257,14 +255,13 @@ extern "C" int nblink_packet_parse(struct ofpbuf * pktin,  struct hmap * pktout,
 	            pktout_field->pos = (uint32_t) field->Position;
 
                 char * pEnd;
-	            vendor = strtol(field->LongName+1,&pEnd,0);
+	            vendor = strtol(field->NextField->LongName+1,&pEnd,0);
 	            type = (uint32_t) (vendor<<7)+(strtol(pEnd,NULL,10));
-
                 pktout_field->value = (uint8_t*) malloc(field->Size);
                 _nbPDMLField * nbPrevField; 
 
                 if( !field->isField)
-                    nbPrevField = field->FirstChild;
+                    nbPrevField = field->NextField->FirstChild;
                 else
                     nbPrevField = proto->FirstField;
     
@@ -274,7 +271,7 @@ extern "C" int nblink_packet_parse(struct ofpbuf * pktin,  struct hmap * pktout,
                 {
                     if(nbPrevField->NextField != NULL)
                     {
-                        nbPrevField=nbPrevField->NextField;
+                        nbPrevField = nbPrevField->NextField;
                     }
                     else
                     {
@@ -285,11 +282,9 @@ extern "C" int nblink_packet_parse(struct ofpbuf * pktin,  struct hmap * pktout,
 
                 if (found)
                 {
-                                      
                     pktout_field->header = OXM_HEADER(VENDOR_FROM_TYPE(type),FIELD_FROM_TYPE(type),nbPrevField->Size);
                     memcpy(pktout_field->value,((uint8_t*)pktin->data + nbPrevField->Position),nbPrevField->Size);
                     pktout_field->pos = (uint32_t) nbPrevField->Position;
-	
                    	nblink_add_entry_hmap(pktin, pktout , pktout_field, (int) field->Size);
                     
                 }

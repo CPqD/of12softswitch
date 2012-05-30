@@ -44,8 +44,6 @@ ofl_actions_free(struct ofl_action_header *act, struct ofl_exp *exp) {
     switch (act->type) {
         case OFPAT_SET_FIELD:{
             struct ofl_action_set_field *a = (struct ofl_action_set_field*) act;
-            //struct ofl_match_tlv *tlv = a->field;
-            //printf("a->field->header %d\n",tlv->header); 
             free(a->field->value);
             free(a->field);
             free(a);
