@@ -157,6 +157,8 @@ ofl_structs_match_put_eth(struct ofl_match *match, uint32_t header, uint8_t valu
     m->header = header;
     m->value = malloc(len);
     memcpy(m->value, &value, len);
+    size_t str_size;
+    char *str;
     hmap_insert(&match->match_fields,&m->hmap_node,hash_int(header, 0));
     match->header.length += len + 4;
 
@@ -185,6 +187,7 @@ ofl_structs_match_put_ipv6(struct ofl_match *match, uint32_t header, const struc
     m->header = header;
     m->value = malloc(len);
     memcpy(m->value, &value, len);
+    char addr_str[INET6_ADDRSTRLEN]; 
     hmap_insert(&match->match_fields,&m->hmap_node,hash_int(header, 0));
     match->header.length += len + 4;
 
@@ -204,8 +207,8 @@ ofl_structs_match_put_ipv6m(struct ofl_match *match, uint32_t header, const stru
 
 }
 
-size_t 
-ofl_structs_match_convert_pktf2oflm(struct hmap * hmap_packet_fields, struct hmap * hmap_ofl_match)
+void
+ofl_structs_match_convert_pktf2oflm(struct hmap * hmap_packet_fields, struct ofl_match * match)
 /*
 * Used to convert between a hmap of "struct packet_fields" to "struct ofl_match"
 */
@@ -214,16 +217,39 @@ ofl_structs_match_convert_pktf2oflm(struct hmap * hmap_packet_fields, struct hma
     size_t len = 0;
     HMAP_FOR_EACH(iter,struct packet_fields, hmap_node, hmap_packet_fields)
     {
-        struct ofl_match_tlv * new_entry = (struct ofl_match_tlv *) malloc(sizeof(struct ofl_match_tlv));
-        
-        new_entry->header = iter->header;
-        new_entry->value = (uint8_t *) malloc(OXM_LENGTH(new_entry->header));
-        
-        memcpy(new_entry->value, iter->value,OXM_LENGTH(new_entry->header));
-        len += OXM_LENGTH(new_entry->header) + 4;
-        hmap_insert_fast(hmap_ofl_match, &new_entry->hmap_node,hash_int(new_entry->header, 0));
+        len = OXM_LENGTH(iter->header);
+        switch(len){
+            case(sizeof(uint8_t)):{ 
+                            ofl_structs_match_put8(match, iter->header, *iter->value);
+            }
+                            break;
+            case(sizeof(uint16_t)): {
+                            uint16_t *v = (uint16_t*) iter->value;
+                            ofl_structs_match_put16(match, iter->header, *v);
+                            break;
+            }
+             case(sizeof(uint32_t)):{
+                            uint32_t *v = (uint32_t*) iter->value; 
+                            ofl_structs_match_put32(match, iter->header, *v);
+                            break;
+            }
+            case(ETH_ADDR_LEN):{
+                    ofl_structs_match_put_eth(match, iter->header, iter->value);
+                    break;
+            }       
+            case(sizeof(uint64_t)):{
+                            uint64_t *v = (uint64_t*) iter->value; 
+                            ofl_structs_match_put64(match, iter->header, *v); 
+                            break;
+            }
+            case(sizeof(struct in6_addr)):{
+                            //struct in6_addr *v = (struct in6_addr*) iter->value;
+                            ofl_structs_match_put_ipv6(match, iter->header, (struct in6_addr*) iter->value);
+                            break;
+            }    
+        }
     }
-    return len;
+        
 }
 
 

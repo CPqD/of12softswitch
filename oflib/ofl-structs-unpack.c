@@ -721,7 +721,6 @@ ofl_structs_oxm_match_unpack(struct ofp_match* src, uint8_t* buf, size_t *len, s
      m->header.type = ntohs(src->type);
      m->header.length = ntohs(src->length) - (sizeof(struct ofp_match) -4);
     *len -= ROUND_UP(ntohs(src->length),8);
-    
      if(ntohs(src->length) > sizeof(struct ofp_match)){
          ofpbuf_put(b, buf, m->header.length); 
          error = oxm_pull_match(b,m,m->header.length);

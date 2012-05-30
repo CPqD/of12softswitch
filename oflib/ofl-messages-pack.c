@@ -154,7 +154,7 @@ ofl_msg_pack_packet_in(struct ofl_msg_packet_in *msg, uint8_t **buf, size_t *buf
     size_t match_len;
 
     
-    *buf_len = ROUND_UP(sizeof(struct ofp_packet_in)-4 + msg->match->length,8) + msg->data_length;
+    *buf_len = ROUND_UP((sizeof(struct ofp_packet_in)-4) + msg->match->length,8) + msg->data_length + 2;
     *buf     = (uint8_t *)malloc(*buf_len);
    
     packet_in = (struct ofp_packet_in *)(*buf);
@@ -163,16 +163,16 @@ ofl_msg_pack_packet_in(struct ofl_msg_packet_in *msg, uint8_t **buf, size_t *buf
     packet_in->reason      =       msg->reason;
     packet_in->table_id    =       msg->table_id;
 
-    ptr = (*buf) + sizeof(struct ofp_packet_in) - 4;
-
+    ptr = (*buf) + (sizeof(struct ofp_packet_in) - 4);
     match_len = ofl_structs_match_pack(msg->match,&(packet_in->match),ptr,NULL);
-    ptr = (*buf) + ROUND_UP(sizeof(struct ofp_packet_in)-4 + match_len,8) ;
+    ptr = (*buf) + ROUND_UP((sizeof(struct ofp_packet_in)-4) + msg->match->length,8);
     /*padding bytes*/
-    
+
     memset(ptr,0,2); 
     /* Ethernet frame */
     if (msg->data_length > 0) {
-        memcpy(ptr, msg->data, msg->data_length);
+        memcpy(ptr , msg->data, msg->data_length);
+        
     }
    
     return 0;

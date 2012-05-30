@@ -301,7 +301,8 @@ ofl_structs_match_put_ipv6m(struct ofl_match *match, uint32_t header, const stru
 int 
 ofl_structs_match_ofp_total_len(struct ofl_match *match);
 
-size_t ofl_structs_match_convert_pktf2oflm(struct hmap * hmap_packet_fields, struct hmap * hmap_ofl_match);
+void
+ofl_structs_match_convert_pktf2oflm(struct hmap * hmap_packet_fields, struct ofl_match * match);
 /****************************************************************************
  * Functions for (un)packing structures
  ****************************************************************************/
