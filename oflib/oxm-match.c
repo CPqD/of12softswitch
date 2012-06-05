@@ -28,6 +28,7 @@
 #include "ofpbuf.h"
 #include "oflib/ofl-structs.h"
 #include "unaligned.h"
+#include "byte-order.h"
 #include "../include/openflow/openflow.h"
 
 #define LOG_MODULE VLM_oxm_match
@@ -151,7 +152,11 @@ oxm_prereqs_ok(const struct oxm_field *field, const struct ofl_match *rule)
               &rule->match_fields) {
               uint16_t eth_type;
               memcpy(&eth_type, omt->value, sizeof(uint16_t));
-              if (ntohs(field->dl_type[0]) == eth_type) {
+              /* dl_type may be in HBO or NBO */
+              if (get_byteorder(eth_type)){
+                    eth_type = htons(eth_type);
+             }
+              if (field->dl_type[0] == eth_type) {
                 return true;
               } else if (ntohs(field->dl_type[1]) && ntohs(field->dl_type[1]) == eth_type) {
                 return true;

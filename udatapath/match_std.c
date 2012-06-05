@@ -148,6 +148,9 @@ packet_match(struct ofl_match *flow_match, struct ofl_match *packet){
     struct packet_fields *packet_f;
     bool ret = false;
 
+    if (flow_match->header.length == 0){
+        return true;
+    }
     /*TODO: Possible combinations of VLAN_ID and masks */
     HMAP_FOR_EACH_WITH_HASH(f, struct ofl_match_tlv, hmap_node,hash_int(OXM_OF_VLAN_VID, 0), &flow_match->match_fields){
         uint16_t *matchv = (uint16_t*) f->value;
@@ -158,6 +161,7 @@ packet_match(struct ofl_match *flow_match, struct ofl_match *packet){
                 return false;
             ret = true;
         }
+
         if (*matchv == OFPVID_PRESENT  & OXM_HASMASK(f->header)){
             uint16_t *maskv = (uint16_t*) f->value + 2;
                 if (*maskv == OFPVID_PRESENT && !ret )
