@@ -238,20 +238,19 @@ ofl_msg_unpack_packet_in(struct ofp_header *src, uint8_t* buf, size_t *len, stru
         }
         return ofl_error(OFPET_BAD_ACTION, OFPBAC_BAD_ARGUMENT);
     }
-    *len -= sizeof(struct ofp_packet_in)-4;
+    *len -= sizeof(struct ofp_packet_in) - sizeof(struct ofp_match);
     dp = (struct ofl_msg_packet_in *)malloc(sizeof(struct ofl_msg_packet_in));
-
     dp->buffer_id = ntohl(sp->buffer_id);
     dp->total_len = ntohs(sp->total_len);
     dp->reason = (enum ofp_packet_in_reason)sp->reason;
     dp->table_id = sp->table_id;
     
-    
     ptr = buf + (sizeof(struct ofp_packet_in)-4);
-    ofl_structs_match_unpack(&(sp->match),ptr,len,&(dp->match),NULL);
+    ofl_structs_match_unpack(&(sp->match),ptr, len ,&(dp->match),NULL);
     
-    ptr = buf + ROUND_UP(sizeof(struct ofp_packet_in)-4 + dp->match->length,8);
-    *len -= ROUND_UP(sizeof(struct ofp_packet_in)-4 + dp->match->length,8);
+    ptr = buf + ROUND_UP(sizeof(struct ofp_packet_in)-4 + dp->match->length,8) + 2;
+    /* Minus padding bytes */
+    *len -= 2;
     dp->data_length = *len;
     dp->data = *len > 0 ? (uint8_t *)memcpy(malloc(*len), ptr, *len) : NULL;
     *len = 0;
@@ -283,6 +282,7 @@ ofl_msg_unpack_flow_removed(struct ofp_header *src,uint8_t *buf, size_t *len, st
         }
         return ofl_error(OFPET_BAD_ACTION, OFPBAC_BAD_ARGUMENT);
     }
+    printf("LEN %d\n", *len);
     *len -=  sizeof(struct ofp_flow_removed) - sizeof(struct ofp_match) ;
 
     dr = (struct ofl_msg_flow_removed *)malloc(sizeof(struct ofl_msg_flow_removed));
@@ -309,6 +309,7 @@ ofl_msg_unpack_flow_removed(struct ofp_header *src,uint8_t *buf, size_t *len, st
         free(dr);
         return error;
     }
+    printf(" LEN %d\n", *len );
     *msg = (struct ofl_msg_header *)dr;
     return 0;
 }
@@ -328,7 +329,7 @@ ofl_msg_unpack_port_status(struct ofp_header *src, size_t *len, struct ofl_msg_h
     ss = (struct ofp_port_status *)src;
     ds = (struct ofl_msg_port_status *)malloc(sizeof(struct ofl_msg_port_status));
 
-    ds->reason = ss->reason;
+    ds->reason = (enum ofp_port_reason) ss->reason;
 
     error = ofl_structs_port_unpack(&(ss->desc), len, &(ds->desc));
     if (error) {
@@ -635,7 +636,8 @@ ofl_msg_unpack_stats_request_flow(struct ofp_stats_request *os,uint8_t* buf, siz
     dm->cookie = ntoh64(sm->cookie);
     dm->cookie_mask = ntoh64(sm->cookie_mask);
 
-    match_pos = sizeof(struct ofp_stats_request) + sizeof(struct ofp_flow_stats_request) - 4;
+     match_pos = sizeof(struct ofp_stats_request) + sizeof(struct ofp_flow_stats_request) - 4;
+
     error = ofl_structs_match_unpack(&(sm->match),buf + match_pos, len, &(dm->match), exp);
     if (error) {
         free(dm);

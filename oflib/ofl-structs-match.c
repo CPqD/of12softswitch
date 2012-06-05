@@ -249,5 +249,4 @@ ofl_structs_match_convert_pktf2oflm(struct hmap * hmap_packet_fields, struct ofl
             }
         }
     }
-        
 }

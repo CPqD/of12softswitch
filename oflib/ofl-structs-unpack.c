@@ -272,7 +272,7 @@ ofl_structs_flow_stats_unpack(struct ofp_flow_stats *src, uint8_t *buf, size_t *
     size_t slen;
     size_t i;
     int match_pos;
-    
+
     if (*len < (sizeof(struct ofp_flow_stats) - ntohs(src->match.length))) {
         OFL_LOG_WARN(LOG_MODULE, "Received flow stats has invalid length (%zu).", *len);
         return ofl_error(OFPET_BAD_ACTION, OFPBRC_BAD_LEN);
@@ -291,6 +291,7 @@ ofl_structs_flow_stats_unpack(struct ofp_flow_stats *src, uint8_t *buf, size_t *
         }
         return ofl_error(OFPET_BAD_ACTION, OFPBRC_BAD_LEN);
     }
+
     slen = ntohs(src->length) - (sizeof(struct ofp_flow_stats) - sizeof(struct ofp_match));
 
     s = (struct ofl_flow_stats *)malloc(sizeof(struct ofl_flow_stats));
@@ -305,6 +306,7 @@ ofl_structs_flow_stats_unpack(struct ofp_flow_stats *src, uint8_t *buf, size_t *
     s->byte_count =    ntoh64(src->byte_count);
 
     match_pos = sizeof(struct ofp_flow_stats) - 4;
+
     error = ofl_structs_match_unpack(&(src->match),buf + match_pos , &slen, &(s->match), exp);
     if (error) {
         free(s);
@@ -717,17 +719,15 @@ ofl_structs_oxm_match_unpack(struct ofp_match* src, uint8_t* buf, size_t *len, s
 
      int error = 0;
      struct ofpbuf *b = ofpbuf_new(0);
-     struct ofl_match *m = malloc(sizeof(struct ofl_match));
+     struct ofl_match *m = (struct ofl_match *) malloc(sizeof(struct ofl_match));
      m->header.type = ntohs(src->type);
-     m->header.length = ntohs(src->length) - (sizeof(struct ofp_match) -4);
     *len -= ROUND_UP(ntohs(src->length),8);
      if(ntohs(src->length) > sizeof(struct ofp_match)){
          ofpbuf_put(b, buf, m->header.length); 
-         error = oxm_pull_match(b,m,m->header.length);
-         
+         error = oxm_pull_match(b, m, ntohs(src->length) - (sizeof(struct ofp_match) -4));
      }
     else m->header.length = 0;
-    ofpbuf_delete(b);
+    ofpbuf_delete(b);    
     *dst = m;
     return error;
 }
@@ -737,6 +737,7 @@ ofl_structs_match_unpack(struct ofp_match *src,uint8_t * buf, size_t *len, struc
 
     switch (ntohs(src->type)) {
         case (OFPMT_OXM): {
+
              return ofl_structs_oxm_match_unpack(src, buf, len, (struct ofl_match**) dst );       
             
         }
