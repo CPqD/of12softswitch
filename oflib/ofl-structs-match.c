@@ -156,7 +156,7 @@ ofl_structs_match_put_eth(struct ofl_match *match, uint32_t header, uint8_t valu
     
     m->header = header;
     m->value = malloc(len);
-    memcpy(m->value, &value, len);
+    memcpy(m->value, value, len);
     hmap_insert(&match->match_fields,&m->hmap_node,hash_int(header, 0));
     match->header.length += len + 4;
 
@@ -169,8 +169,8 @@ ofl_structs_match_put_eth_m(struct ofl_match *match, uint32_t header, uint8_t va
     
     m->header = header;
     m->value = malloc(len*2);
-    memcpy(m->value, &value, len);
-    memcpy(m->value + len, &mask, len);
+    memcpy(m->value, value, len);
+    memcpy(m->value + len, mask, len);
     hmap_insert(&match->match_fields,&m->hmap_node,hash_int(header, 0));
     match->header.length += len*2 + 4;
 
