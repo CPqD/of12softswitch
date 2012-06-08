@@ -145,9 +145,8 @@ pipeline_process_packet(struct pipeline *pl, struct packet *pkt) {
         next_table    = NULL;
         
         entry = flow_table_lookup(table, pkt);
-
         if (entry != NULL) {
-            if (VLOG_IS_DBG_ENABLED(LOG_MODULE)) {
+	   if (VLOG_IS_DBG_ENABLED(LOG_MODULE)) {
                 char *m = ofl_structs_flow_stats_to_string(entry->stats, pkt->dp->exp);
                 VLOG_DBG_RL(LOG_MODULE, &rl, "found matching entry: %s.", m);
                 free(m);
@@ -233,9 +232,8 @@ pipeline_handle_flow_mod(struct pipeline *pl, struct ofl_msg_flow_mod *msg,
             struct packet *pkt;
 
             pkt = dp_buffers_retrieve(pl->dp->buffers, msg->buffer_id);
-
             if (pkt != NULL) {
-                pipeline_process_packet(pl, pkt);
+		pipeline_process_packet(pl, pkt);
             } else {
                 VLOG_WARN_RL(LOG_MODULE, &rl, "The buffer flow_mod referred to was empty (%u).", msg->buffer_id);
             }
