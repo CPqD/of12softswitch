@@ -368,6 +368,16 @@ struct ofl_msg_stats_reply_group_desc {
     struct ofl_group_desc_stats **stats;
 };
 
+struct ofl_msg_stats_reply_group_features {
+    struct ofl_msg_stats_reply_header   header; /* OFPST_GROUP_FEATURES */
+
+    uint32_t types;
+    uint32_t capabilities;
+    uint32_t max_groups[4];
+    uint32_t actions[4];
+};
+
+
 struct ofl_msg_stats_reply_experimenter {
     struct ofl_msg_stats_reply_header   header; /* OFPST_EXPERIMENTER */
 

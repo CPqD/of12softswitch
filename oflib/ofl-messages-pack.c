@@ -463,7 +463,10 @@ ofl_msg_pack_stats_request(struct ofl_msg_stats_request_header *msg, uint8_t **b
         error = ofl_msg_pack_stats_request_empty(msg, buf, buf_len);
         break;
     }
-    case OFPST_GROUP_FEATURES:
+    case OFPST_GROUP_FEATURES: {
+        error = ofl_msg_pack_stats_request_empty(msg, buf, buf_len);
+        break;
+    }    
     case OFPST_EXPERIMENTER: {
         if (exp == NULL || exp->stats == NULL || exp->stats->req_pack == NULL) {
             OFL_LOG_WARN(LOG_MODULE, "Trying to pack experimenter stat req, but no callback was given.");
@@ -521,7 +524,6 @@ ofl_msg_pack_stats_reply_flow(struct ofl_msg_stats_reply_flow *msg, uint8_t **bu
     *buf_len = sizeof(struct ofp_stats_reply) + ofl_structs_flow_stats_ofp_total_len(msg->stats, msg->stats_num, exp);
     *buf     = (uint8_t *)malloc(*buf_len);
     resp = (struct ofp_stats_reply *)(*buf);
-    int len = 0;
     data = (uint8_t*) resp->body; 
     for (i=0; i<msg->stats_num; i++) {
         data += ofl_structs_flow_stats_pack(msg->stats[i], data, exp);
@@ -639,6 +641,25 @@ ofl_msg_pack_stats_reply_group_desc(struct ofl_msg_stats_reply_group_desc *msg, 
     return 0;
 }
 
+static int
+ofl_msg_pack_stats_reply_group_features(struct ofl_msg_stats_reply_group_features *msg, uint8_t **buf, size_t *buf_len) {
+    struct ofp_stats_reply *resp;
+    struct ofp_group_features_stats *stats;
+    int i;
+    *buf_len = sizeof(struct ofp_stats_reply) + sizeof(struct ofp_group_features_stats);
+    *buf     = (uint8_t *)malloc(*buf_len);
+
+    resp = (struct ofp_stats_reply *)(*buf);
+    stats = (struct ofp_group_features_stats *)resp->body;
+    stats->types = htonl(msg->types);
+    stats->capabilities = htonl(msg->capabilities);
+    for(i = 0; i < 4; i++){
+        stats->max_groups[i] = htonl(msg->max_groups[i]);
+        stats->actions[i] = htonl(msg->actions[i]);
+    }
+
+    return 0;
+}
 
 static int
 ofl_msg_pack_stats_reply(struct ofl_msg_stats_reply_header *msg, uint8_t **buf, size_t *buf_len, struct ofl_exp *exp) {
@@ -678,7 +699,10 @@ ofl_msg_pack_stats_reply(struct ofl_msg_stats_reply_header *msg, uint8_t **buf, 
             error = ofl_msg_pack_stats_reply_group_desc((struct ofl_msg_stats_reply_group_desc *)msg, buf, buf_len, exp);
             break;
         }
-        case OFPST_GROUP_FEATURES:
+        case OFPST_GROUP_FEATURES:{
+            error = ofl_msg_pack_stats_reply_group_features((struct ofl_msg_stats_reply_group_features *) msg, buf, buf_len);
+            break;
+        }
         case OFPST_EXPERIMENTER: {
             if (exp == NULL || exp->stats == NULL || exp->stats->reply_pack == NULL) {
                 OFL_LOG_WARN(LOG_MODULE, "Trying to pack experimenter stat resp, but no callback was given.");

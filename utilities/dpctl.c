@@ -975,36 +975,22 @@ parse_match(char *str, struct ofl_match_header **match) {
             else ofl_structs_match_put32(m,OXM_OF_IN_PORT,in_port);
             continue;
         }
-        /*if (strncmp(token, MATCH_DL_SRC KEY_VAL, strlen(MATCH_DL_SRC KEY_VAL)) == 0) {
-            if (parse_dl_addr(token + strlen(MATCH_DL_SRC KEY_VAL), m->dl_src)) {
-                ofp_fatal(0, "Error parsing dl_src: %s.", token);
-            }
-            continue;
-        }
         if (strncmp(token, MATCH_DL_SRC KEY_VAL, strlen(MATCH_DL_SRC KEY_VAL)) == 0) {
-            if (parse_dl_addr(token + strlen(MATCH_DL_SRC KEY_VAL), m->dl_src)) {
+            uint8_t eth_src[6];
+            if (parse_dl_addr(token + strlen(MATCH_DL_SRC KEY_VAL), eth_src)) {
                 ofp_fatal(0, "Error parsing dl_src: %s.", token);
             }
-            continue;
-        }
-        if (strncmp(token, MATCH_DL_SRC_MASK KEY_VAL, strlen(MATCH_DL_SRC_MASK KEY_VAL)) == 0) {
-            if (parse_dl_addr(token + strlen(MATCH_DL_SRC_MASK KEY_VAL), m->dl_src_mask)) {
-                ofp_fatal(0, "Error parsing dl_src_mask: %s.", token);
-            }
+            else ofl_structs_match_put_eth(m,OXM_OF_ETH_SRC,eth_src);
             continue;
         }
         if (strncmp(token, MATCH_DL_DST KEY_VAL, strlen(MATCH_DL_DST KEY_VAL)) == 0) {
-            if (parse_dl_addr(token + strlen(MATCH_DL_DST KEY_VAL), m->dl_dst)) {
+            uint8_t eth_dst[6];
+            if (parse_dl_addr(token + strlen(MATCH_DL_DST KEY_VAL), eth_dst)) {
                 ofp_fatal(0, "Error parsing dl_dst: %s.", token);
             }
+            else ofl_structs_match_put_eth(m,OXM_OF_ETH_DST,eth_dst);
             continue;
         }
-        if (strncmp(token, MATCH_DL_DST_MASK KEY_VAL, strlen(MATCH_DL_DST_MASK KEY_VAL)) == 0) {
-            if (parse_dl_addr(token + strlen(MATCH_DL_DST_MASK KEY_VAL), m->dl_dst_mask)) {
-                ofp_fatal(0, "Error parsing dl_dst_mask: %s.", token);
-            }
-            continue;
-        }*/
         if (strncmp(token, MATCH_DL_VLAN KEY_VAL, strlen(MATCH_DL_VLAN KEY_VAL)) == 0) {
             uint16_t dl_vlan;
             if (parse_vlan_vid(token + strlen(MATCH_DL_VLAN KEY_VAL), &dl_vlan)) {
@@ -1014,9 +1000,10 @@ parse_match(char *str, struct ofl_match_header **match) {
             continue;
         }/*
         if (strncmp(token, MATCH_DL_VLAN_PCP KEY_VAL, strlen(MATCH_DL_VLAN_PCP KEY_VAL)) == 0) {
-            if (parse8(token + strlen(MATCH_DL_VLAN_PCP KEY_VAL), NULL, 0, 0x7, &(m->dl_vlan_pcp))) {
+            uint8_t pcp;
+            if (parse8(token + strlen(MATCH_DL_VLAN_PCP KEY_VAL), NULL, 0, 0x7, &pcp)) {
                 ofp_fatal(0, "Error parsing vlan pcp: %s.", token);
-            }
+            } else ofl_structs_match_put8(m, OXM_OF_VLA);
             continue;
         }*/
         if (strncmp(token, MATCH_DL_TYPE KEY_VAL, strlen(MATCH_DL_TYPE KEY_VAL)) == 0) {
