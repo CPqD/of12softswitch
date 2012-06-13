@@ -506,6 +506,13 @@ dp_execute_action(struct packet *pkt,
         VLOG_DBG_RL(LOG_MODULE, &rl, "executing action %s.", a);
         free(a);
     }
+
+        char *a = ofl_action_to_string(action, pkt->dp->exp);
+        VLOG_ERR_RL(LOG_MODULE, &rl, "executing action %s.", a);
+        free(a);
+
+
+
     switch (action->type) {
         case (OFPAT_SET_FIELD): {
             set_field(pkt,(struct ofl_action_set_field*) action);
