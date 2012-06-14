@@ -41,7 +41,7 @@
    which both match structures match on. */
 bool
 match_std_overlap(struct ofl_match *a, struct ofl_match *b) {
-	return 0;//match_std_nonstrict(a, b) || match_std_nonstrict(b, a);
+    return (match_std_nonstrict(a, b) || match_std_nonstrict(b, a));
 }
 
 static int
@@ -162,7 +162,7 @@ packet_match(struct ofl_match *flow_match, struct ofl_match *packet){
             ret = true;
         }
 
-        if (*matchv == OFPVID_PRESENT  & OXM_HASMASK(f->header)){
+        if ((*matchv == OFPVID_PRESENT)  & (OXM_HASMASK(f->header))){
             uint16_t *maskv = (uint16_t*) f->value + 2;
                 if (*maskv == OFPVID_PRESENT && !ret )
                     return false;     
@@ -341,13 +341,14 @@ match_std_strict(struct ofl_match *a, struct ofl_match *b) {
        /* Check if the field is present in the flow entry */
         HMAP_FOR_EACH_WITH_HASH(flow_entry_match, struct ofl_match_tlv, hmap_node, hash_int(flow_mod_match->header, 0), &b->match_fields){                  
                 int field_len =  OXM_LENGTH(flow_mod_match->header);
+                bool has_mask;
                 /* Check if both fields have or not a mask */
                 if ( (OXM_HASMASK(flow_mod_match->header) && !OXM_HASMASK(flow_entry_match->header))
                     || (!OXM_HASMASK(flow_mod_match->header) && OXM_HASMASK(flow_entry_match->header))){
                     return false;
                 }
                 ret = true;
-                bool has_mask = OXM_HASMASK(flow_mod_match->header);
+                has_mask = OXM_HASMASK(flow_mod_match->header);
                 switch (field_len){
                     case (sizeof(uint8_t)):{
                         if (has_mask){
@@ -497,14 +498,14 @@ struct ofl_match_tlv *flow_mod_match;
        /* Check if the field is present in the flow entry */
         HMAP_FOR_EACH_WITH_HASH(flow_entry_match, struct ofl_match_tlv, hmap_node, hash_int(flow_mod_match->header, 0), &b->match_fields){                  
                 int field_len =  OXM_LENGTH(flow_mod_match->header);
+                bool has_mask;
                 /* Check if both fields have or not a mask */
                 if ( (OXM_HASMASK(flow_mod_match->header) && !OXM_HASMASK(flow_entry_match->header))
                     || (!OXM_HASMASK(flow_mod_match->header) && OXM_HASMASK(flow_entry_match->header))){
                     return false;
                 }
                 ret = true;
-
-                bool has_mask = OXM_HASMASK(flow_mod_match->header);
+                has_mask = OXM_HASMASK(flow_mod_match->header);
                 switch (field_len){
                     case (sizeof(uint8_t)):{
                         if (has_mask){
