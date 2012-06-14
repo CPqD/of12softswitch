@@ -87,6 +87,7 @@ static void
 send_packet_to_controller(struct pipeline *pl, struct packet *pkt, uint8_t table_id, uint8_t reason) {
 
     struct ofl_msg_packet_in msg;
+    struct ofl_match *m;
     msg.header.type = OFPT_PACKET_IN;
     msg.total_len   = pkt->buffer->size;
     msg.reason      = reason;
@@ -104,7 +105,7 @@ send_packet_to_controller(struct pipeline *pl, struct packet *pkt, uint8_t table
         msg.data_length = pkt->buffer->size;
     }
  
-    struct ofl_match *m = xmalloc (sizeof(struct ofl_match));
+    m = xmalloc (sizeof(struct ofl_match));
     ofl_structs_match_init(m);
     /* In this implementation the fields in_port and in_phy_port 
         always will be the same, because we are not considering logical
@@ -185,12 +186,13 @@ pipeline_handle_flow_mod(struct pipeline *pl, struct ofl_msg_flow_mod *msg,
      *       from all tables */
     ofl_err error;
     size_t i;
+    bool match_kept,insts_kept; 
 
     if(sender->remote->role == OFPCR_ROLE_SLAVE)
         return ofl_error(OFPET_BAD_REQUEST, OFPBRC_IS_SLAVE);
 
-    bool match_kept = false;
-    bool insts_kept = false;
+    match_kept = false;
+    insts_kept = false;
 
     // Validate actions in flow_mod
     for (i=0; i< msg->instructions_num; i++) {

@@ -153,7 +153,7 @@ oxm_prereqs_ok(const struct oxm_field *field, const struct ofl_match *rule)
               uint16_t eth_type;
               memcpy(&eth_type, omt->value, sizeof(uint16_t));
               /* dl_type may be in HBO or NBO */
-              if (get_byteorder(eth_type)){
+              if (!get_byteorder(eth_type)){
                     eth_type = htons(eth_type);
              }
               if (field->dl_type[0] == eth_type) {
@@ -508,23 +508,6 @@ oxm_put_16w(struct ofpbuf *buf, uint32_t header, uint16_t value, uint16_t mask)
 }
 
 static void
-oxm_put_16m(struct ofpbuf *buf, uint32_t header, uint16_t value, uint16_t mask)
-{
-    switch (mask) {
-    case 0:
-        break;
-
-    case CONSTANT_HTONS(UINT16_MAX):
-        oxm_put_16(buf, header, value);
-        break;
-
-    default:
-        oxm_put_16w(buf, OXM_MAKE_WILD_HEADER(header), value, mask);
-        break;
-    }
-}
-
-static void
 oxm_put_32(struct ofpbuf *buf, uint32_t header, uint32_t value)
 {
     oxm_put_header(buf, header);
@@ -537,23 +520,6 @@ oxm_put_32w(struct ofpbuf *buf, uint32_t header, uint32_t value, uint32_t mask)
     oxm_put_header(buf, header);
     ofpbuf_put(buf, &value, sizeof value); 
     ofpbuf_put(buf, &mask, sizeof mask); 
-}
-
-static void
-oxm_put_32m(struct ofpbuf *buf, uint32_t header, uint32_t value, uint32_t mask)
-{
-    switch (mask) {
-    case 0:
-        break;
-
-    case CONSTANT_HTONL(UINT32_MAX):
-        oxm_put_32(buf, header, value);
-        break;
-
-    default:
-        oxm_put_32w(buf, OXM_MAKE_WILD_HEADER(header), value, mask);
-        break;
-    }
 }
 
 static void
@@ -570,25 +536,7 @@ oxm_put_64w(struct ofpbuf *buf, uint32_t header, uint64_t value, uint64_t mask)
     ofpbuf_put(buf, &value, sizeof value); 
     ofpbuf_put(buf, &mask, sizeof mask); 
 }
-
           
-static void
-oxm_put_64m(struct ofpbuf *buf, uint32_t header, uint64_t value, uint64_t mask)
-{
-    switch (mask) {
-    case 0:
-        break;
-
-    case CONSTANT_HTONLL(UINT64_MAX):
-        oxm_put_64(buf, header, value);
-        break;
-
-    default:
-        oxm_put_64w(buf, OXM_MAKE_WILD_HEADER(header), value, mask);
-        break;
-    }
-}
-
 static void
 oxm_put_eth(struct ofpbuf *buf, uint32_t header,
             const uint8_t value[ETH_ADDR_LEN])

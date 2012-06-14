@@ -246,6 +246,7 @@ ofl_msg_unpack_packet_in(struct ofp_header *src, uint8_t* buf, size_t *len, stru
     dp->table_id = sp->table_id;
     
     ptr = buf + (sizeof(struct ofp_packet_in)-4);
+    printf("unpacking\n");
     ofl_structs_match_unpack(&(sp->match),ptr, len ,&(dp->match),NULL);
     
     ptr = buf + ROUND_UP(sizeof(struct ofp_packet_in)-4 + dp->match->length,8) + 2;

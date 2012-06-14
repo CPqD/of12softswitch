@@ -1037,37 +1037,31 @@ parse_match(char *str, struct ofl_match_header **match) {
             }
             else ofl_structs_match_put32(m, OXM_OF_IPV4_SRC,nw_src);
             continue;
-        }/*
-        if (strncmp(token, MATCH_NW_SRC_MASK KEY_VAL, strlen(MATCH_NW_SRC_MASK KEY_VAL)) == 0) {
-            if (parse_nw_addr(token + strlen(MATCH_NW_SRC_MASK KEY_VAL), &(m->nw_src_mask))) {
-                ofp_fatal(0, "Error parsing nw_src_mask: %s.", token);
-            }
-            continue;
         }
         if (strncmp(token, MATCH_NW_DST KEY_VAL, strlen(MATCH_NW_DST KEY_VAL)) == 0) {
-            if (parse_nw_addr(token + strlen(MATCH_NW_DST KEY_VAL), &(m->nw_dst))) {
+            uint32_t nw_dst;
+            if (parse_nw_addr(token + strlen(MATCH_NW_DST KEY_VAL), &nw_dst)) {
                 ofp_fatal(0, "Error parsing nw_dst: %s.", token);
             }
-            continue;
-        }
-        if (strncmp(token, MATCH_NW_DST_MASK KEY_VAL, strlen(MATCH_NW_DST_MASK KEY_VAL)) == 0) {
-            if (parse_nw_addr(token + strlen(MATCH_NW_DST_MASK KEY_VAL), &(m->nw_dst_mask))) {
-                ofp_fatal(0, "Error parsing nw_dst_mask: %s.", token);
-            }
+            else ofl_structs_match_put32(m, OXM_OF_IPV4_DST,nw_dst);
             continue;
         }
         if (strncmp(token, MATCH_TP_SRC KEY_VAL, strlen(MATCH_TP_SRC KEY_VAL)) == 0) {
-            if (parse16(token + strlen(MATCH_TP_SRC KEY_VAL), NULL, 0, 0xffff, &(m->tp_src))) {
+            uint16_t tp_src;
+            if (parse16(token + strlen(MATCH_TP_SRC KEY_VAL), NULL, 0, 0xffff, &tp_src)) {
                 ofp_fatal(0, "Error parsing tp_src: %s.", token);
             }
+            else ofl_structs_match_put16(m, OXM_OF_TCP_SRC,tp_src);
             continue;
         }
         if (strncmp(token, MATCH_TP_DST KEY_VAL, strlen(MATCH_TP_DST KEY_VAL)) == 0) {
-            if (parse16(token + strlen(MATCH_TP_DST KEY_VAL), NULL, 0, 0xffff, &(m->tp_dst))) {
+            uint16_t tp_dst;
+            if (parse16(token + strlen(MATCH_TP_DST KEY_VAL), NULL, 0, 0xffff, &tp_dst)) {
                 ofp_fatal(0, "Error parsing tp_dst: %s.", token);
             }
+            else ofl_structs_match_put16(m, OXM_OF_TCP_DST,tp_dst);
             continue;
-        }*/
+        }
         if (strncmp(token, MATCH_MPLS_LABEL KEY_VAL, strlen(MATCH_MPLS_LABEL KEY_VAL)) == 0) {
             uint32_t mpls_label;
             if (parse32(token + strlen(MATCH_MPLS_LABEL KEY_VAL), NULL, 0, 0xfffff, &mpls_label)) {
