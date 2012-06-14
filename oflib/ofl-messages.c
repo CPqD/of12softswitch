@@ -183,7 +183,6 @@ ofl_msg_free(struct ofl_msg_header *msg, struct ofl_exp *exp) {
             return 0;
         }
         case OFPT_FEATURES_REQUEST: {
-            
             break;
         }
         case OFPT_FEATURES_REPLY: {

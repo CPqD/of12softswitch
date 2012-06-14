@@ -66,6 +66,18 @@ struct ofl_queue_prop_min_rate {
     uint16_t   rate; /* In 1/10 of a percent; >1000 -> disabled. */
 };
 
+struct ofl_queue_prop_max_rate {
+    struct ofl_queue_prop_header   header; /* OFPQT_MAX_RATE */
+
+    uint16_t   rate; /* In 1/10 of a percent; >1000 -> disabled. */
+};
+
+struct ofl_queue_prop_experimenter {
+    struct ofl_queue_prop_header prop_header; /* prop: OFPQT_EXPERIMENTER, len: 16. */
+    uint32_t experimenter;
+    uint8_t *data; /* Experimenter defined data. */
+};
+
 
 struct ofl_instruction_header {
     enum ofp_instruction_type   type; /* Instruction type */

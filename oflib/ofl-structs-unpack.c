@@ -440,6 +440,36 @@ ofl_structs_queue_prop_unpack(struct ofp_queue_prop_header *src, size_t *len, st
             *dst = (struct ofl_queue_prop_header *)dp;
             break;
         }
+        case OFPQT_MAX_RATE:{
+            struct ofp_queue_prop_max_rate *sp = (struct ofp_queue_prop_max_rate *)src;
+            struct ofl_queue_prop_max_rate *dp = (struct ofl_queue_prop_max_rate *)malloc(sizeof(struct ofl_queue_prop_max_rate));
+            
+            if (*len < sizeof(struct ofp_queue_prop_max_rate)) {
+                OFL_LOG_WARN(LOG_MODULE, "Received MAX_RATE queue property has invalid length (%zu).", *len);
+                return ofl_error(OFPET_BAD_ACTION, OFPBRC_BAD_LEN);
+            }
+            *len -= sizeof(struct ofp_queue_prop_max_rate);   
+            dp->rate = ntohs(sp->rate);
+
+            *dst = (struct ofl_queue_prop_header *)dp;
+            break;    
+        
+        }
+        case OFPQT_EXPERIMENTER:{
+            struct ofp_queue_prop_experimenter *sp = (struct ofp_queue_prop_experimenter *)src;
+            struct ofl_queue_prop_experimenter *dp = (struct ofl_queue_prop_experimenter *)malloc(sizeof(struct ofl_queue_prop_experimenter));
+            
+            if (*len < sizeof(struct ofp_queue_prop_experimenter)) {
+                OFL_LOG_WARN(LOG_MODULE, "Received EXPERIMENTER queue property has invalid length (%zu).", *len);
+                return ofl_error(OFPET_BAD_ACTION, OFPBRC_BAD_LEN);
+            }
+            *len -= sizeof(struct ofp_queue_prop_experimenter);   
+            dp->data = sp->data;
+
+            *dst = (struct ofl_queue_prop_header *)dp;
+            break;    
+        
+        }
         default: {
             OFL_LOG_WARN(LOG_MODULE, "Received unknown queue prop type.");
             return ofl_error(OFPET_BAD_ACTION, OFPBRC_BAD_LEN);

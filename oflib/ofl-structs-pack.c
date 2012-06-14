@@ -263,7 +263,6 @@ ofl_structs_flow_stats_pack(struct ofl_flow_stats *src, uint8_t *dst, struct ofl
     for (i=0; i < src->instructions_num; i++) {
         data += ofl_structs_instructions_pack(src->instructions[i], (struct ofp_instruction *) data, exp);
     }
-    struct ofp_flow_stats *f = (struct ofp_flow_stats *) dst;
     return total_len;
 }
 
@@ -364,10 +363,10 @@ ofl_structs_queue_prop_ofp_len(struct ofl_queue_prop_header *prop) {
             return sizeof(struct ofp_queue_prop_min_rate);
         }
         case OFPQT_MAX_RATE:{
-            return 0;
+           return sizeof(struct ofp_queue_prop_max_rate);
         }
         case OFPQT_EXPERIMENTER:{
-            return 0;
+           return sizeof(struct ofp_queue_prop_experimenter);
         }
     }
     return 0;
@@ -392,10 +391,22 @@ ofl_structs_queue_prop_pack(struct ofl_queue_prop_header *src,
             return sizeof(struct ofp_queue_prop_min_rate);
         }
         case OFPQT_MAX_RATE:{
-            return 1;
+            struct ofl_queue_prop_max_rate *sp = (struct ofl_queue_prop_max_rate *)src;
+            struct ofp_queue_prop_max_rate *dp = (struct ofp_queue_prop_max_rate *)dst;
+            dp->prop_header.len = htons(sizeof(struct ofp_queue_prop_max_rate));
+            dp->rate            = htons(sp->rate);
+            memset(dp->pad, 0x00, 6);
+
+            return sizeof(struct ofp_queue_prop_max_rate);
         }
         case OFPQT_EXPERIMENTER:{
-            return 1;
+            struct ofl_queue_prop_experimenter *sp = (struct ofl_queue_prop_experimenter *)src;
+            struct ofp_queue_prop_experimenter *dp = (struct ofp_queue_prop_experimenter*)dst;
+            dp->prop_header.len = htons(sizeof(struct ofp_queue_prop_experimenter));
+            memset(dp->pad, 0x00, 4);
+            /*TODO Eder: How to copy without a know len?? */
+            //dp->data = sp->data;
+            return sizeof(struct ofp_queue_prop_experimenter);
         }
         default: {
             return 0;
@@ -403,7 +414,6 @@ ofl_structs_queue_prop_pack(struct ofl_queue_prop_header *src,
     }
 
 }
-
 
 size_t
 ofl_structs_packet_queue_ofp_total_len(struct ofl_packet_queue ** queues,
