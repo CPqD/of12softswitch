@@ -507,12 +507,6 @@ dp_execute_action(struct packet *pkt,
         free(a);
     }
 
-        char *a = ofl_action_to_string(action, pkt->dp->exp);
-        VLOG_ERR_RL(LOG_MODULE, &rl, "executing action %s.", a);
-        free(a);
-
-
-
     switch (action->type) {
         case (OFPAT_SET_FIELD): {
             set_field(pkt,(struct ofl_action_set_field*) action);
@@ -639,28 +633,34 @@ dp_actions_output_port(struct packet *pkt, uint32_t out_port, uint32_t out_queue
             break;
         }
         case (OFPP_CONTROLLER): {
-            dp_buffers_save(pkt->dp->buffers, pkt);
-
-            {
-                struct ofl_msg_packet_in msg =
-                        {{.type = OFPT_PACKET_IN},
-                         .buffer_id   = pkt->buffer_id,
-                         .total_len   = pkt->buffer->size,
-                         .reason      = OFPR_ACTION,
-                         .table_id    = pkt->table_id,
-                         .data_length = MIN(max_len, pkt->buffer->size),
-                         .data        = pkt->buffer->data};
-                
-                struct ofl_match *m = xmalloc (sizeof(struct ofl_match));
-                ofl_structs_match_init(m);
-                /* In this implementation the fields in_port and in_phy_port 
-                always will be the same, because we are not considering logical
-                ports                                 */
-                ofl_structs_match_convert_pktf2oflm(&pkt->handle_std->match.match_fields, m);
-                msg.match = (struct ofl_match_header*)m;
-                dp_send_message(pkt->dp, (struct ofl_msg_header *)&msg, NULL);
-                ofl_structs_free_match((struct ofl_match_header* ) m, NULL);
+            struct ofl_msg_packet_in msg;
+            struct ofl_match *m; 
+            msg.header.type = OFPT_PACKET_IN;
+            msg.total_len   = pkt->buffer->size;
+            msg.reason = OFPR_ACTION;
+            msg.table_id = pkt->table_id;
+            msg.data        = pkt->buffer->data;
+            
+            
+            if (pkt->dp->config.miss_send_len != OFPCML_NO_BUFFER){
+                dp_buffers_save(pkt->dp->buffers, pkt);
+                msg.buffer_id = pkt->buffer_id;
+                msg.data_length = MIN(max_len, pkt->buffer->size);
             }
+            else {
+                msg.buffer_id = OFP_NO_BUFFER;
+                msg.data_length =  pkt->buffer->size;                               
+            }    
+            
+            m = xmalloc (sizeof(struct ofl_match));
+            ofl_structs_match_init(m);
+            /* In this implementation the fields in_port and in_phy_port 
+                always will be the same, because we are not considering logical
+                ports*/
+            ofl_structs_match_convert_pktf2oflm(&pkt->handle_std->match.match_fields, m);
+            msg.match = (struct ofl_match_header*)m;
+            dp_send_message(pkt->dp, (struct ofl_msg_header *)&msg, NULL);
+            ofl_structs_free_match((struct ofl_match_header* ) m, NULL); 
             break;
         }
         case (OFPP_FLOOD):

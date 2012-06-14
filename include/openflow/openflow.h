@@ -1076,6 +1076,8 @@ enum ofp_controller_role {
     OFPCR_ROLE_SLAVE = 3,    /* Read-only access. */
 };
 
+#define OFP_NO_BUFFER 0xffffffff
+
 /* Packet received on port (datapath -> controller). */
 struct ofp_packet_in {
 	struct ofp_header header;

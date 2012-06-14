@@ -50,8 +50,6 @@
 #include "util.h"
 #include "oflib/oxm-match.h"
 #include "vlog.h"
-//remover depois
-#include "hash.h"
 
 
 #define LOG_MODULE VLM_pipeline
@@ -88,27 +86,33 @@ pipeline_create(struct datapath *dp) {
 static void
 send_packet_to_controller(struct pipeline *pl, struct packet *pkt, uint8_t table_id, uint8_t reason) {
 
-    dp_buffers_save(pl->dp->buffers, pkt);
-    
-    {
-        struct ofl_msg_packet_in msg =
-                {{.type = OFPT_PACKET_IN},
-                 .buffer_id   = pkt->buffer_id,
-                 .total_len   = pkt->buffer->size,
-                 .reason      = reason,
-                 .table_id    = table_id,
-                 .data_length = MIN(pl->dp->config.miss_send_len, pkt->buffer->size),
-                 .data        = pkt->buffer->data};
-        struct ofl_match *m = xmalloc (sizeof(struct ofl_match));
-        ofl_structs_match_init(m);
-        /* In this implementation the fields in_port and in_phy_port 
-            always will be the same, because we are not considering logical
-            ports                                 */
-        ofl_structs_match_convert_pktf2oflm(&pkt->handle_std->match.match_fields, m);
-        msg.match = (struct ofl_match_header*)m;
-        dp_send_message(pl->dp, (struct ofl_msg_header *)&msg, NULL);
-        ofl_structs_free_match((struct ofl_match_header* ) m, NULL);
+    struct ofl_msg_packet_in msg;
+    msg.header.type = OFPT_PACKET_IN;
+    msg.total_len   = pkt->buffer->size;
+    msg.reason      = reason;
+    msg.table_id    = table_id;
+    msg.data = pkt->buffer->data;
+          
+    /* A max_len of OFPCML_NO_BUFFER means that the complete
+        packet should be sent, and it should not be buffered.*/
+    if (pl->dp->config.miss_send_len != OFPCML_NO_BUFFER){
+        dp_buffers_save(pl->dp->buffers, pkt);
+        msg.buffer_id   = pkt->buffer_id;
+        msg.data_length = MIN(pl->dp->config.miss_send_len, pkt->buffer->size);
+    }else {
+        msg.buffer_id   = OFP_NO_BUFFER;
+        msg.data_length = pkt->buffer->size;
     }
+ 
+    struct ofl_match *m = xmalloc (sizeof(struct ofl_match));
+    ofl_structs_match_init(m);
+    /* In this implementation the fields in_port and in_phy_port 
+        always will be the same, because we are not considering logical
+        ports                                 */
+    ofl_structs_match_convert_pktf2oflm(&pkt->handle_std->match.match_fields, m);
+    msg.match = (struct ofl_match_header*)m;
+    dp_send_message(pl->dp, (struct ofl_msg_header *)&msg, NULL);
+    ofl_structs_free_match((struct ofl_match_header* ) m, NULL); 
     
 }
 
