@@ -302,13 +302,10 @@ void
 ofl_structs_match_put_eth_m(struct ofl_match *match, uint32_t header, uint8_t value[ETH_ADDR_LEN], uint8_t mask[ETH_ADDR_LEN]);
 
 void 
-ofl_structs_match_put_ipv6(struct ofl_match *match, uint32_t header, const struct in6_addr *value);
+ofl_structs_match_put_ipv6(struct ofl_match *match, uint32_t header, uint8_t value[IPv6_ADDR_LEN] );
 
 void 
-ofl_structs_match_put_ipv6(struct ofl_match *match, uint32_t header, const struct in6_addr *value);
-
-void 
-ofl_structs_match_put_ipv6m(struct ofl_match *match, uint32_t header, const struct in6_addr *value, const struct in6_addr *mask);
+ofl_structs_match_put_ipv6m(struct ofl_match *match, uint32_t header, uint8_t value[IPv6_ADDR_LEN], uint8_t mask[IPv6_ADDR_LEN]);
 
 int 
 ofl_structs_match_ofp_total_len(struct ofl_match *match);

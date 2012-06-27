@@ -300,13 +300,14 @@ parse_oxm_entry(struct ofl_match *match, const struct oxm_field *f,
         
             /* IPv6 addresses. */
         case OFI_OXM_OF_IPV6_SRC:
-        case OFI_OXM_OF_IPV6_DST:
-            ofl_structs_match_put_ipv6(match, f->header,(struct in6_addr*) value);
+        case OFI_OXM_OF_IPV6_DST:{
+            int j;
+            ofl_structs_match_put_ipv6(match, f->header,(uint8_t* ) value);
             return 0;
-          
+        }
         case OFI_OXM_OF_IPV6_SRC_W:
         case OFI_OXM_OF_IPV6_DST_W:{
-            ofl_structs_match_put_ipv6m(match, f->header,(struct in6_addr*) value,(struct in6_addr*) mask);
+            ofl_structs_match_put_ipv6m(match, f->header,(uint8_t* ) value,(uint8_t* ) mask);
             return 0;
         }
         case OFI_OXM_OF_IPV6_FLABEL:{
@@ -340,7 +341,7 @@ parse_oxm_entry(struct ofl_match *match, const struct oxm_field *f,
             
             /* IPv6 Neighbor Discovery. */
         case OFI_OXM_OF_IPV6_ND_TARGET:
-            ofl_structs_match_put_ipv6(match, f->header,(struct in6_addr*) value);
+            ofl_structs_match_put_ipv6(match, f->header,(uint8_t* ) value);
             return 0;
         case OFI_OXM_OF_IPV6_ND_SLL:
         case OFI_OXM_OF_IPV6_ND_TLL:
@@ -556,16 +557,16 @@ oxm_put_ethm(struct ofpbuf *buf, uint32_t header,
 }
 
 static void oxm_put_ipv6(struct ofpbuf *buf, uint32_t header,
-                    const struct in6_addr value){
+                    uint8_t value[IPv6_ADDR_LEN]){
      oxm_put_header(buf, header);
-     ofpbuf_put(buf, &value, sizeof(struct in6_addr));
+     ofpbuf_put(buf, value, IPv6_ADDR_LEN);
 }    
 
 static void oxm_put_ipv6m(struct ofpbuf *buf, uint32_t header,
-                    const struct in6_addr value, const struct in6_addr mask){  
+                    uint8_t value[ETH_ADDR_LEN], uint8_t mask[ETH_ADDR_LEN]){  
     oxm_put_header(buf, header);
-    ofpbuf_put(buf, &value, sizeof(struct in6_addr));
-    ofpbuf_put(buf, &mask, sizeof(struct in6_addr));
+    ofpbuf_put(buf, value, IPv6_ADDR_LEN);
+    ofpbuf_put(buf, mask, IPv6_ADDR_LEN);
 }    
 
 /* TODO: put the ethernet destiny address handling possible masks
@@ -719,14 +720,14 @@ int oxm_put_match(struct ofpbuf *buf, struct ofl_match *omt){
                       }  
                       break;    
                    }
-               case (sizeof(struct in6_addr)):{ 
-                     struct in6_addr value;
-                     memcpy(&value, oft->value,length);
+               case (IPv6_ADDR_LEN):{ 
+                     uint8_t value[IPv6_ADDR_LEN];
+                     memcpy(value, oft->value,IPv6_ADDR_LEN);
                      if(!has_mask) 
                          oxm_put_ipv6(buf,oft->header, value);
                      else {
-                         struct in6_addr mask;
-                         memcpy(&mask,oft->value + length ,length);
+                         uint8_t mask[IPv6_ADDR_LEN];
+                         memcpy(&mask,oft->value + length ,IPv6_ADDR_LEN);
                          oxm_put_ipv6m(buf, oft->header,value,mask);
                       }  
                       break;    

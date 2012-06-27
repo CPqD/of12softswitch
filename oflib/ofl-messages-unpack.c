@@ -246,7 +246,6 @@ ofl_msg_unpack_packet_in(struct ofp_header *src, uint8_t* buf, size_t *len, stru
     dp->table_id = sp->table_id;
     
     ptr = buf + (sizeof(struct ofp_packet_in)-4);
-    printf("unpacking\n");
     ofl_structs_match_unpack(&(sp->match),ptr, len ,&(dp->match),NULL);
     
     ptr = buf + ROUND_UP(sizeof(struct ofp_packet_in)-4 + dp->match->length,8) + 2;
@@ -283,7 +282,6 @@ ofl_msg_unpack_flow_removed(struct ofp_header *src,uint8_t *buf, size_t *len, st
         }
         return ofl_error(OFPET_BAD_ACTION, OFPBAC_BAD_ARGUMENT);
     }
-    printf("LEN %d\n", *len);
     *len -=  sizeof(struct ofp_flow_removed) - sizeof(struct ofp_match) ;
 
     dr = (struct ofl_msg_flow_removed *)malloc(sizeof(struct ofl_msg_flow_removed));
@@ -310,7 +308,6 @@ ofl_msg_unpack_flow_removed(struct ofp_header *src,uint8_t *buf, size_t *len, st
         free(dr);
         return error;
     }
-    printf(" LEN %d\n", *len );
     *msg = (struct ofl_msg_header *)dr;
     return 0;
 }
@@ -451,11 +448,12 @@ ofl_msg_unpack_flow_mod(struct ofp_header *src,uint8_t* buf, size_t *len, struct
     dm->flags =        ntohs( sm->flags);
     
     match_pos = sizeof(struct ofp_flow_mod) - 4;
-    error = ofl_structs_match_unpack(&(sm->match),buf + match_pos, len, &(dm->match), exp);
+    error = ofl_structs_match_unpack(&(sm->match), buf + match_pos, len, &(dm->match), exp);
     if (error) {
         free(dm);
         return error;
     }
+    
     error = ofl_utils_count_ofp_instructions((struct ofp_instruction *)(buf + ROUND_UP(match_pos + dm->match->length,8)), *len, &dm->instructions_num);
     if (error) {
         ofl_structs_free_match(dm->match, exp);

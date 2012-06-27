@@ -177,28 +177,29 @@ ofl_structs_match_put_eth_m(struct ofl_match *match, uint32_t header, uint8_t va
 }
 
 void 
-ofl_structs_match_put_ipv6(struct ofl_match *match, uint32_t header, const struct in6_addr *value){
+ofl_structs_match_put_ipv6(struct ofl_match *match, uint32_t header, uint8_t value[IPv6_ADDR_LEN]){
 
     struct ofl_match_tlv *m = malloc(sizeof (struct ofl_match_tlv));
-    int len = sizeof(struct in6_addr);
+    int len = IPv6_ADDR_LEN;
     
     m->header = header;
     m->value = malloc(len);
-    memcpy(m->value, &value, len);
+    memcpy(m->value, value, len);
+    int j;
     hmap_insert(&match->match_fields,&m->hmap_node,hash_int(header, 0));
     match->header.length += len + 4;
 
 }
 
 void 
-ofl_structs_match_put_ipv6m(struct ofl_match *match, uint32_t header, const struct in6_addr *value, const struct in6_addr *mask){
+ofl_structs_match_put_ipv6m(struct ofl_match *match, uint32_t header, uint8_t value[IPv6_ADDR_LEN], uint8_t mask[IPv6_ADDR_LEN]){
     struct ofl_match_tlv *m = malloc(sizeof (struct ofl_match_tlv));
-    int len = sizeof(struct in6_addr);
+    int len = IPv6_ADDR_LEN;
     
     m->header = header;
     m->value = malloc(len*2);
-    memcpy(m->value, &value, len);
-    memcpy(m->value + len, &mask, len);
+    memcpy(m->value, value, len);
+    memcpy(m->value + len, mask, len);
     hmap_insert(&match->match_fields,&m->hmap_node,hash_int(header, 0));
     match->header.length += len*2 + 4;
 
@@ -242,8 +243,8 @@ ofl_structs_match_convert_pktf2oflm(struct hmap * hmap_packet_fields, struct ofl
                                 ofl_structs_match_put64(match, iter->header, *v); 
                                 break;
                 }
-                case(sizeof(struct in6_addr)):{
-                                ofl_structs_match_put_ipv6(match, iter->header, (struct in6_addr*) iter->value);
+                case(IPv6_ADDR_LEN):{
+                                ofl_structs_match_put_ipv6(match, iter->header, (uint8_t*) iter->value);
                                 break;
                 }    
             }
