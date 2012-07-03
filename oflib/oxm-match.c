@@ -27,6 +27,7 @@
 #include "packets.h"
 #include "ofpbuf.h"
 #include "oflib/ofl-structs.h"
+#include "oflib/ofl-utils.h"
 #include "unaligned.h"
 #include "byte-order.h"
 #include "../include/openflow/openflow.h"
@@ -225,6 +226,7 @@ parse_oxm_entry(struct ofl_match *match, const struct oxm_field *f,
             return 0;
         }
         case OFI_OXM_OF_ETH_TYPE:{
+            printf("VALUE %x\n", get_unaligned_u16(value));
             ofl_structs_match_put16(match, f->header, get_unaligned_u16(value));
             return 0;
         }   
@@ -615,7 +617,7 @@ int oxm_put_match(struct ofpbuf *buf, struct ofl_match *omt){
           &omt->match_fields) {
         uint32_t value;
         memcpy(&value, oft->value,sizeof(uint32_t)); 
-        oxm_put_32(buf,oft->header, value);
+        oxm_put_32(buf,oft->header, htonl(value));
     }
     
     /* L2 Pre-requisites */
@@ -623,9 +625,9 @@ int oxm_put_match(struct ofpbuf *buf, struct ofl_match *omt){
     /* Ethernet type */
     HMAP_FOR_EACH_WITH_HASH(oft, struct ofl_match_tlv, hmap_node, hash_int(OXM_OF_ETH_TYPE, 0),
           &omt->match_fields) {
-         uint16_t value;
+        uint16_t value;
         memcpy(&value, oft->value,sizeof(uint16_t));
-        oxm_put_16(buf,oft->header, value);           
+        oxm_put_16(buf,oft->header, htons(value));           
     }
     
      /* VLAN ID */
@@ -633,7 +635,7 @@ int oxm_put_match(struct ofpbuf *buf, struct ofl_match *omt){
           &omt->match_fields) {
          uint16_t value;
          memcpy(&value, oft->value,sizeof(uint16_t));
-         oxm_put_16(buf,oft->header, value);
+         oxm_put_16(buf,oft->header, htons(value));
     }
     
     /* L3 Pre-requisites */   
@@ -674,11 +676,11 @@ int oxm_put_match(struct ofpbuf *buf, struct ofl_match *omt){
                     uint16_t value;
                     memcpy(&value, oft->value,sizeof(uint16_t));
                     if(!has_mask) 
-                        oxm_put_16(buf,oft->header, value);
+                        oxm_put_16(buf,oft->header, htons(value));
                     else {
                         uint16_t mask;
                         memcpy(&mask,oft->value + length ,sizeof(uint16_t));
-                        oxm_put_16w(buf, oft->header,value,mask);
+                        oxm_put_16w(buf, oft->header,htons(value),htons(mask));
                     }   
                     break;     
                 }    
@@ -686,11 +688,11 @@ int oxm_put_match(struct ofpbuf *buf, struct ofl_match *omt){
                     uint32_t value;
                     memcpy(&value, oft->value,sizeof(uint32_t));
                     if(!has_mask) 
-                         oxm_put_32(buf,oft->header, value);
+                         oxm_put_32(buf,oft->header, htonl(value));
                     else {
                          uint32_t mask;
                          memcpy(&mask,oft->value + length ,sizeof(uint32_t));
-                         oxm_put_32w(buf, oft->header,value,mask);
+                         oxm_put_32w(buf, oft->header,htonl(value),htonl(mask));
                     } 
                       break;     
                             
@@ -699,11 +701,11 @@ int oxm_put_match(struct ofpbuf *buf, struct ofl_match *omt){
                      uint64_t value;
                      memcpy(&value, oft->value,sizeof(uint64_t));
                      if(!has_mask) 
-                         oxm_put_64(buf,oft->header, value);
+                         oxm_put_64(buf,oft->header, hton64(value));
                      else {
                          uint64_t mask;
                          memcpy(&mask,oft->value + length ,sizeof(uint64_t));
-                         oxm_put_64w(buf, oft->header,value,mask);
+                         oxm_put_64w(buf, oft->header,hton64(value),hton64(mask));
                      }
                      break;      
                 }                 
