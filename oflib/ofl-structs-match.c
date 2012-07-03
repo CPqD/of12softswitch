@@ -185,7 +185,6 @@ ofl_structs_match_put_ipv6(struct ofl_match *match, uint32_t header, uint8_t val
     m->header = header;
     m->value = malloc(len);
     memcpy(m->value, value, len);
-    int j;
     hmap_insert(&match->match_fields,&m->hmap_node,hash_int(header, 0));
     match->header.length += len + 4;
 

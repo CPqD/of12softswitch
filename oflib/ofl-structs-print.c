@@ -186,7 +186,7 @@ print_oxm_tlv(FILE *stream, struct ofl_match_tlv *f, size_t *size){
                             uint16_t *v = (uint16_t *) f->value;
                             fprintf(stream, "eth_type=0x");
                             fprintf(stream,"%x",  *v);
-                            *size -= 6;                                
+                            *size -= 6; 
                             if (*size > 4)                                
                                 fprintf(stream, ", ");
                 }

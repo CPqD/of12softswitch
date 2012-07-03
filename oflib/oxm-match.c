@@ -301,7 +301,6 @@ parse_oxm_entry(struct ofl_match *match, const struct oxm_field *f,
             /* IPv6 addresses. */
         case OFI_OXM_OF_IPV6_SRC:
         case OFI_OXM_OF_IPV6_DST:{
-            int j;
             ofl_structs_match_put_ipv6(match, f->header,(uint8_t* ) value);
             return 0;
         }
