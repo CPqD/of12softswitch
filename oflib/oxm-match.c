@@ -153,13 +153,9 @@ oxm_prereqs_ok(const struct oxm_field *field, const struct ofl_match *rule)
               &rule->match_fields) {
               uint16_t eth_type;
               memcpy(&eth_type, omt->value, sizeof(uint16_t));
-              /* dl_type may be in HBO or NBO */
-              if (!get_byteorder(eth_type)){
-                    eth_type = htons(eth_type);
-             }
-              if (field->dl_type[0] == eth_type) {
+              if (field->dl_type[0] == htons(eth_type)) {
                 return true;
-              } else if (ntohs(field->dl_type[1]) && ntohs(field->dl_type[1]) == eth_type) {
+              } else if (field->dl_type[1] && field->dl_type[1] ==  htons(eth_type)) {
                 return true;
               }
         }
@@ -196,7 +192,8 @@ parse_oxm_entry(struct ofl_match *match, const struct oxm_field *f,
 
     switch (f->index) {
         case OFI_OXM_OF_IN_PORT: {
-            ofl_structs_match_put32(match, f->header, get_unaligned_u32(value));
+            uint32_t* in_port = (uint32_t*) value;
+            ofl_structs_match_put32(match, f->header, htonl(*in_port));
             return 0;
         }
         case OFI_OXM_OF_IN_PHY_PORT:{
@@ -226,8 +223,8 @@ parse_oxm_entry(struct ofl_match *match, const struct oxm_field *f,
             return 0;
         }
         case OFI_OXM_OF_ETH_TYPE:{
-            printf("VALUE %x\n", get_unaligned_u16(value));
-            ofl_structs_match_put16(match, f->header, get_unaligned_u16(value));
+            uint16_t* eth_type = (uint16_t*) value;
+            ofl_structs_match_put16(match, f->header, ntohs(*eth_type));
             return 0;
         }   
         /* 802.1Q header. */
@@ -336,10 +333,11 @@ parse_oxm_entry(struct ofl_match *match, const struct oxm_field *f,
         case OFI_OXM_OF_ICMPV4_CODE:
             /* ICMPv6 header. */
         case OFI_OXM_OF_ICMPV6_TYPE:
-        case OFI_OXM_OF_ICMPV6_CODE:
-                ofl_structs_match_put8(match, f->header, htons(*(uint8_t *) value));
+        case OFI_OXM_OF_ICMPV6_CODE:{
+                uint8_t *v = (uint8_t*) value;
+                ofl_structs_match_put8(match, f->header, *v);
                 return 0;
-            
+        }
             /* IPv6 Neighbor Discovery. */
         case OFI_OXM_OF_IPV6_ND_TARGET:
             ofl_structs_match_put_ipv6(match, f->header,(uint8_t* ) value);
