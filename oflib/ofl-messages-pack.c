@@ -170,7 +170,7 @@ ofl_msg_pack_packet_in(struct ofl_msg_packet_in *msg, uint8_t **buf, size_t *buf
     memset(ptr,0,2); 
     /* Ethernet frame */
     if (msg->data_length > 0) {
-        memcpy(ptr , msg->data, msg->data_length);
+        memcpy(ptr + 2 , msg->data, msg->data_length);
         
     }
     
