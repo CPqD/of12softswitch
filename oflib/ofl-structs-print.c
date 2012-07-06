@@ -377,6 +377,18 @@ print_oxm_tlv(FILE *stream, struct ofl_match_tlv *f, size_t *size){
                             if (*size > 4)                                
                                 fprintf(stream, ", ");
                 }
+                else if (f->header == OXM_OF_ICMPV6_TYPE){
+                            fprintf(stream, "icmpv6_type= %d", *f->value);
+                            *size -= 5;                                
+                            if (*size > 4)                                
+                                fprintf(stream, ", ");
+                } 
+                else if (f->header == OXM_OF_ICMPV6_CODE){
+                            fprintf(stream, "icmpv6_code= %d", *f->value);
+                            *size -= 5;                                
+                            if (*size > 4)                                
+                                fprintf(stream, ", ");
+                }
                 else if (f->header == OXM_OF_MPLS_LABEL){
                             uint32_t mask = 0xfffff;
                             fprintf(stream, "mpls_label=%x",((uint32_t) *f->value) & mask );
