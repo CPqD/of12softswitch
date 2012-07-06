@@ -272,8 +272,7 @@ ofl_structs_flow_stats_unpack(struct ofp_flow_stats *src, uint8_t *buf, size_t *
     size_t slen;
     size_t i;
     int match_pos;
-
-    if (*len < (sizeof(struct ofp_flow_stats) + ntohs(src->match.length))) {
+    if (*len < ( (sizeof(struct ofp_flow_stats) - sizeof(struct ofp_match)) + ROUND_UP(ntohs(src->match.length),8))) {
         OFL_LOG_WARN(LOG_MODULE, "Received flow stats has invalid length (%zu).", *len);
         return ofl_error(OFPET_BAD_ACTION, OFPBRC_BAD_LEN);
     }
@@ -755,6 +754,7 @@ ofl_structs_oxm_match_unpack(struct ofp_match* src, uint8_t* buf, size_t *len, s
      if(ntohs(src->length) > sizeof(struct ofp_match)){
          ofpbuf_put(b, buf, ntohs(src->length) - (sizeof(struct ofp_match) -4)); 
          error = oxm_pull_match(b, m, ntohs(src->length) - (sizeof(struct ofp_match) -4));
+         m->header.length = ntohs(src->length) - 4;
      }
     else m->header.length = 0;
     ofpbuf_delete(b);    
