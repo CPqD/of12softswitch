@@ -48,6 +48,7 @@
 #include "oflib/ofl-structs.h"
 #include "nbee_link/nbee_link.h"
 #include "util.h"
+#include "hash.h"
 #include "oflib/oxm-match.h"
 #include "vlog.h"
 
@@ -428,17 +429,18 @@ execute_entry(struct pipeline *pl, struct flow_entry *entry,
             }
             case OFPIT_WRITE_METADATA: {
                 struct ofl_instruction_write_metadata *wi = (struct ofl_instruction_write_metadata *)inst;
-                struct ofl_match *m;
-
+                struct  packet_fields *f;
                 /* NOTE: Hackish solution. If packet had multiple handles, metadata
-                 *       should be updated in all. 
+                 *       should be updated in all. */
                  
                 packet_handle_std_validate(pkt->handle_std);
-                m = (struct ofl_match *)pkt->handle_std->match;
-            
-                m->metadata =
-                        (m->metadata & ~wi->metadata_mask) | (wi->metadata & wi->metadata_mask);
-                break;*/
+                
+                /* Search field on the description of the packet. */
+                HMAP_FOR_EACH_WITH_HASH(f,struct packet_fields, hmap_node, hash_int(OXM_OF_METADATA,0), &pkt->handle_std->match.match_fields){
+                    uint64_t *metadata = (uint64_t*) f->value; 
+                    memset(f->value,(*metadata & ~wi->metadata_mask) | (wi->metadata & wi->metadata_mask), sizeof(uint64_t));     
+                }
+                break;
             }
             case OFPIT_WRITE_ACTIONS: {
                 struct ofl_instruction_actions *wa = (struct ofl_instruction_actions *)inst;
