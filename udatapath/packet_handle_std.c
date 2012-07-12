@@ -51,7 +51,7 @@
 void
 packet_handle_std_validate(struct packet_handle_std *handle) {
 
-   struct packet_fields * pktout_field;
+   struct packet_fields * pktout_inport, *pktout_metadata;
    if(handle->valid)
         return;
         
@@ -60,18 +60,19 @@ packet_handle_std_validate(struct packet_handle_std *handle) {
     handle->valid = true;
     
     /* Add in_port value to the hash_map */    
-    pktout_field = (struct packet_fields*) malloc(sizeof(struct packet_fields));	
-    pktout_field->header = OXM_OF_IN_PORT;
-    pktout_field->value = (uint8_t*) malloc(sizeof(uint32_t));
-    memset(pktout_field->value,0x0,sizeof(uint32_t));
-    memcpy(pktout_field->value,&handle->pkt->in_port,sizeof(uint32_t));
-    hmap_insert(&handle->match.match_fields, &pktout_field->hmap_node,hash_int(pktout_field->header, 0));  
+    pktout_inport = (struct packet_fields*) malloc(sizeof(struct packet_fields));	
+    pktout_inport->header = OXM_OF_IN_PORT;
+    pktout_inport->value = (uint8_t*) malloc(sizeof(uint32_t));
+    memset(pktout_inport->value,0x0,sizeof(uint32_t));
+    memcpy(pktout_inport->value,&handle->pkt->in_port,sizeof(uint32_t));
+    hmap_insert(&handle->match.match_fields, &pktout_inport->hmap_node,hash_int(pktout_inport->header, 0));  
 
     /*Add metadata value to the hash_map */
-    pktout_field->header = OXM_OF_METADATA;
-    pktout_field->value = (uint8_t*) malloc(sizeof(uint64_t) );
-    memset(pktout_field->value,0xffffffffffffffff,sizeof(uint64_t));
-    hmap_insert(&handle->match.match_fields, &pktout_field->hmap_node,hash_int(pktout_field->header, 0));  
+    pktout_metadata = (struct packet_fields*) malloc(sizeof(struct packet_fields));
+    pktout_metadata->header = OXM_OF_METADATA;
+    pktout_metadata->value = (uint8_t*) malloc(sizeof(uint64_t) );
+    memset(pktout_metadata->value, 0xffffffffffffffff, sizeof(uint64_t));
+    hmap_insert(&handle->match.match_fields, &pktout_metadata->hmap_node,hash_int(pktout_metadata->header, 0));  
     return;
 }
 
