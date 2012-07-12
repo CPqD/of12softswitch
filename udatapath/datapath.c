@@ -65,7 +65,6 @@
 #include "rconn.h"
 #include "stp.h"
 #include "vconn.h"
-#include "xtoxll.h"
 
 #define LOG_MODULE VLM_dp
 

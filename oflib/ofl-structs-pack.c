@@ -257,7 +257,7 @@ ofl_structs_flow_stats_pack(struct ofl_flow_stats *src, uint8_t *dst, struct ofl
     flow_stats->byte_count = hton64(src->byte_count);
     data = (dst) + sizeof(struct ofp_flow_stats) - 4;
     
-    ofl_structs_match_pack(src->match, &(flow_stats->match), data, exp);
+    ofl_structs_match_pack(src->match, &(flow_stats->match), data, HOST_ORDER, exp);
     data = (dst) + ROUND_UP(sizeof(struct ofp_flow_stats) -4 + src->match->length, 8);  
     
     for (i=0; i < src->instructions_num; i++) {
@@ -552,7 +552,7 @@ ofl_structs_match_ofp_len(struct ofl_match_header *match, struct ofl_exp *exp) {
 }
 
 size_t
-ofl_structs_match_pack(struct ofl_match_header *src, struct ofp_match *dst, uint8_t* oxm_fields, struct ofl_exp *exp) {
+ofl_structs_match_pack(struct ofl_match_header *src, struct ofp_match *dst, uint8_t* oxm_fields, enum byte_order order, struct ofl_exp *exp) {
     switch (src->type) {
         case (OFPMT_OXM): {
             struct ofl_match *m = (struct ofl_match *)src;
@@ -562,7 +562,9 @@ ofl_structs_match_pack(struct ofl_match_header *src, struct ofp_match *dst, uint
             oxm_fields = (uint8_t*) &dst->oxm_fields;
             dst->length = htons(sizeof(struct ofp_match));
             if (src->length){
-                oxm_len = oxm_put_match(b, m);
+                if (order == HOST_ORDER)
+                    oxm_len = oxm_put_match(b, m);
+                else oxm_len = oxm_put_packet_match(b,m);
                 memcpy(oxm_fields, (uint8_t*) ofpbuf_pull(b,oxm_len), oxm_len);
                 dst->length = htons(oxm_len + ((sizeof(struct ofp_match )-4)));
                 ofpbuf_delete(b);

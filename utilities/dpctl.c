@@ -69,7 +69,6 @@
 #include "vconn.h"
 #include "ipv6_util.h"
 
-#include "xtoxll.h"
 #include "ofpstat.h"
 #include "openflow/private-ext.h"
 

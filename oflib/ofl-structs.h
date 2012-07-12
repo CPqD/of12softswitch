@@ -41,6 +41,7 @@
 #include "ofl-actions.h"
 #include "ofl-packets.h"
 #include "../lib/hmap.h"
+#include "../lib/byte-order.h"
 
 
 struct ofl_exp;
@@ -355,7 +356,7 @@ size_t
 ofl_structs_bucket_counter_pack(struct ofl_bucket_counter *src, struct ofp_bucket_counter *dst);
 
 size_t
-ofl_structs_match_pack(struct ofl_match_header *src, struct ofp_match *dst, uint8_t* oxm_fields, struct ofl_exp *exp);
+ofl_structs_match_pack(struct ofl_match_header *src, struct ofp_match *dst, uint8_t* oxm_fields, enum byte_order order, struct ofl_exp *exp);
 
 
 ofl_err
