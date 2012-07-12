@@ -194,11 +194,13 @@ ofl_actions_pack(struct ofl_action_header *src, struct ofp_action_header *dst, u
         case OFPAT_SET_FIELD: {
             struct ofl_action_set_field *sa = (struct ofl_action_set_field *) src;
             struct ofp_action_set_field *da = (struct ofp_action_set_field *) dst;
+            uint32_t header;
             uint8_t padding_size;
                         
             da->len = htons(sizeof(struct ofp_action_set_field) + ROUND_UP(OXM_LENGTH(sa->field->header),8));
             /*Put OXM header in the field*/
-            memcpy(&da->field, &sa->field->header, 4);
+            header = htonl(sa->field->header);
+            memcpy(&da->field, &header, 4);
             switch (OXM_LENGTH(sa->field->header)){
                 case 1:
                 case 6:
