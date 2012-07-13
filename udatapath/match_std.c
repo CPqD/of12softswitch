@@ -57,20 +57,21 @@ pkt_mask8(uint8_t *a, uint8_t *am, uint8_t *b) {
 
 /* Returns true if two values of 16 bit size match */
 static int
-matches_16(uint8_t *a, uint8_t *b) {
-    uint16_t *a1 = (uint16_t *) a;
-    uint16_t *b1 = (uint16_t *) b;
-    return ((*a1 ^ *b1) == 0);
-}
-
-/* Returns true if two values of a dl_type match bit size match 
-TODO: Don't know why only the ethernet type field comes in NBO*/
-static int
-matches_dl_type(uint8_t *a, uint8_t *b) {
+pkt_match_16(uint8_t *a, uint8_t *b) {
     uint16_t *a1 = (uint16_t *) a;
     uint16_t *b1 = (uint16_t *) b;
     return ((*a1 ^ ntohs(*b1)) == 0);
 }
+
+
+/* Returns true if two values of 16 bit size match */
+static int
+matches_16(uint8_t *a, uint8_t *b) {
+    uint16_t *a1 = (uint16_t *) a;
+    uint16_t *b1 = (uint16_t *) b;
+    return (((*a1 ^ *b1)) == 0);
+}
+
 
 /* Returns true if two values of 16 bit size match, considering their masks. */
 static int
@@ -79,12 +80,31 @@ pkt_mask16(uint8_t *a, uint8_t *am, uint8_t *b) {
     uint16_t *b1 = (uint16_t *) b;
     uint16_t *mask = (uint16_t *) am;
     
-    return (((~*mask) & (ntohs(*a1) ^ *b1)) == 0);
+    return (((~*mask) & (*a1 ^ ntohs(*b1))) == 0);
 }
 
-/*Returns true if two values of 32 bit size match, considering their masks. */
+/* Returns true if two values of 16 bit size match, considering their masks. */
 static int
-matches_32(uint8_t *a, uint8_t *b) {  
+matches_mask16(uint8_t *a, uint8_t *am, uint8_t *b) {
+    uint16_t *a1 = (uint16_t *) a;
+    uint16_t *b1 = (uint16_t *) b;
+    uint16_t *mask = (uint16_t *) am;
+
+    return (((~*mask) & (*a1 ^ *b1)) == 0);
+}
+
+
+/*Returns true if two values of 32 bit size match . */
+static int
+pkt_match_32(uint8_t *a, uint8_t *b) {  
+    uint32_t *a1 = (uint32_t *) a;
+    uint32_t *b1 = (uint32_t *) b;
+    return ((*a1 ^ ntohl(*b1)) == 0);
+}
+
+/*Returns true if two values of 32 bit size match . */
+static int
+matches_32(uint8_t *a, uint8_t *b) {
     uint32_t *a1 = (uint32_t *) a;
     uint32_t *b1 = (uint32_t *) b;
     return ((*a1 ^ *b1) == 0);
@@ -98,6 +118,25 @@ pkt_mask32(uint8_t *a, uint8_t *am, uint8_t *b) {
     uint32_t *mask = (uint32_t *) am;
     
     return (((~*mask) & (*a1 ^ ntohl(*b1))) == 0);
+}
+
+/*Returns true if two values of 32 bit size match, considering their masks. */
+static int
+matches_mask32(uint8_t *a, uint8_t *am, uint8_t *b) {
+    uint32_t *a1 = (uint32_t *) a;
+    uint32_t *b1 = (uint32_t *) b;
+    uint32_t *mask = (uint32_t *) am;
+
+    return (((~*mask) & (*a1 ^ *b1)) == 0);
+}
+
+/* Returns true if two values of 64 bits size match*/
+static int
+pkt_64(uint8_t *a, uint8_t *b) {
+    uint64_t *a1 = (uint64_t *) a;
+    uint64_t *b1 = (uint64_t *) b;
+
+    return ((*a1 ^ ntohll(*b1)) == 0);
 }
 
 /* Returns true if two values of 64 bits size match*/ 
@@ -116,6 +155,16 @@ pkt_mask64(uint8_t *a,uint8_t *am, uint8_t *b) {
     uint64_t *b1 = (uint64_t *) b;
     uint64_t *mask = (uint64_t *) am;
     
+    return (((~*mask) & (*a1 ^ ntohll(*b1))) == 0);
+} 
+
+/* Returns true if two values of 64 bits size match, considering their masks.*/
+static int
+matches_mask64(uint8_t *a,uint8_t *am, uint8_t *b) { 
+    uint64_t *a1 = (uint64_t *) a;
+    uint64_t *b1 = (uint64_t *) b;
+    uint64_t *mask = (uint64_t *) am;
+
     return (((~*mask) & (*a1 ^ *b1)) == 0);
 } 
 
@@ -128,7 +177,7 @@ eth_match(uint8_t *a, uint8_t *b) {
 /* Returns true if the two ethernet addresses match, considering their masks. */
 static int
 eth_mask(uint8_t *a, uint8_t *am, uint8_t *b) {
-     return (pkt_mask32(a,am,b) && pkt_mask16(a+4,am+4,b+4) );
+     return (matches_mask32(a,am,b) && matches_mask16(a+4,am+4,b+4) );
 }
 
 static int
@@ -138,7 +187,7 @@ ipv6_match(uint8_t *a, uint8_t *b) {
 
 static int
 ipv6_mask(uint8_t *a, uint8_t *am, uint8_t *b) {    
-    return (pkt_mask64(a,am,b) && pkt_mask64(a+8,am+8,b+8));
+    return (matches_mask64(a,am,b) && matches_mask64(a+8,am+8,b+8));
 }
 
 bool 
@@ -197,13 +246,9 @@ packet_match(struct ofl_match *flow_match, struct ofl_match *packet){
                             }
                         }
                         else {
-                            if (f->header == OXM_OF_ETH_TYPE){
-                                 if (matches_dl_type(f->value, packet_f->value) == 0){
-                                    return false;
-                                }
-                            }else if (matches_16(f->value, packet_f->value) == 0){
-                                    return false;
-                                    }
+                            if (pkt_match_16(f->value, packet_f->value) == 0){
+                              return false;
+                            }
                         }
                         break;
                     } 
@@ -214,7 +259,7 @@ packet_match(struct ofl_match *flow_match, struct ofl_match *packet){
                             }
                         }
                         else 
-                            if (matches_32(f->value, packet_f->value) == 0){
+                            if (pkt_match_32(f->value, packet_f->value) == 0){
                               return false;
                             }
                         break;

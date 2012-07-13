@@ -829,7 +829,7 @@ int oxm_put_packet_match(struct ofpbuf *buf, struct ofl_match *omt){
                     uint32_t value;
                     memcpy(&value, oft->value,sizeof(uint32_t));
                     if(!has_mask) 
-                         oxm_put_32(buf,oft->header, htonl(value));
+                         oxm_put_32(buf,oft->header, value);
                     else {
                          uint32_t mask;
                          memcpy(&mask,oft->value + length ,sizeof(uint32_t));
