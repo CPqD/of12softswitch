@@ -400,7 +400,7 @@ ofl_structs_queue_prop_pack(struct ofl_queue_prop_header *src,
             return sizeof(struct ofp_queue_prop_max_rate);
         }
         case OFPQT_EXPERIMENTER:{
-            struct ofl_queue_prop_experimenter *sp = (struct ofl_queue_prop_experimenter *)src;
+            //struct ofl_queue_prop_experimenter *sp = (struct ofl_queue_prop_experimenter *)src;
             struct ofp_queue_prop_experimenter *dp = (struct ofp_queue_prop_experimenter*)dst;
             dp->prop_header.len = htons(sizeof(struct ofp_queue_prop_experimenter));
             memset(dp->pad, 0x00, 4);

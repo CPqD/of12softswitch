@@ -21,7 +21,7 @@ nbPDMLReader *PDMLReader;
 int PacketCounter= 1;
 struct pcap_pkthdr * pkhdr;
 
-extern "C" int nblink_initialize()
+extern "C" int nblink_initialize(void)
 {
 
     char ErrBuf[ERRBUF_SIZE + 1];
@@ -29,7 +29,7 @@ extern "C" int nblink_initialize()
     int NetPDLDecoderFlags = nbDECODER_GENERATEPDML_COMPLETE;
     int ShowNetworkNames = 0;
 
-    char* NetPDLFileName = "customnetpdl.xml";
+    char* NetPDLFileName = (char*) "customnetpdl.xml";
 
     pkhdr = new struct pcap_pkthdr;
 

@@ -53,6 +53,7 @@ packet_handle_std_validate(struct packet_handle_std *handle) {
 
    struct packet_fields * pktout_inport, *pktout_metadata;
    uint32_t in_port;
+   uint64_t metadata;
    if(handle->valid)
         return;
         
@@ -73,7 +74,8 @@ packet_handle_std_validate(struct packet_handle_std *handle) {
     pktout_metadata = (struct packet_fields*) malloc(sizeof(struct packet_fields));
     pktout_metadata->header = OXM_OF_METADATA;
     pktout_metadata->value = (uint8_t*) malloc(sizeof(uint64_t) );
-    memset(pktout_metadata->value, 0xffffffffffffffff, sizeof(uint64_t));
+    metadata = 0xffffffffffffffff;
+    memcpy(pktout_metadata->value, &metadata, sizeof(uint64_t));
     hmap_insert(&handle->match.match_fields, &pktout_metadata->hmap_node,hash_int(pktout_metadata->header, 0));  
     return;
 }
@@ -157,16 +159,16 @@ packet_handle_std_match(struct packet_handle_std *handle, struct ofl_match *matc
 }
 
 
-// TODO Denicol: From this point on, work to be done
+/* TODO Denicol: From this point on, work to be done */
 
-/* If pointer is not null, returns str; otherwise returns an empty string. */ /*
+/* If pointer is not null, returns str; otherwise returns an empty string. 
 static inline const char *
 pstr(void *ptr, const char *str) {
     return (ptr == NULL) ? "" : str;
 }
 
-/* Prints the names of protocols that are available in the given protocol stack. */
-/*
+ Prints the names of protocols that are available in the given protocol stack. 
+
 static void
 proto_print(FILE *stream, struct protocols_std *p) {
     fprintf(stream, "{%s%s%s%s%s%s%s%s%s}",

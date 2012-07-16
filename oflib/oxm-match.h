@@ -247,6 +247,8 @@ oxm_pull_match(struct ofpbuf * buf, struct ofl_match *match_dst, int match_len);
 
 int oxm_put_match(struct ofpbuf *buf, struct ofl_match *omt);
 
+int oxm_put_packet_match(struct ofpbuf *buf, struct ofl_match *omt);
+
 char *oxm_match_to_string(const uint8_t *, unsigned int match_len);
 
 int oxm_match_from_string(const char *, struct ofpbuf *);

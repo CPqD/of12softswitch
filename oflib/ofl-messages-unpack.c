@@ -1077,7 +1077,7 @@ ofl_msg_unpack_stats_reply_group_features(struct ofp_stats_reply *os, size_t *le
     }
     *len -= sizeof(struct ofp_group_features_stats);
 
-    sm = (struct ofp_desc_stats *)os->body;
+    sm = (struct ofp_group_features_stats *)os->body;
     dm = (struct ofl_msg_stats_reply_group_features *)malloc(sizeof(struct ofl_msg_stats_reply_group_features));
     
     dm->types = ntohl(sm->types);

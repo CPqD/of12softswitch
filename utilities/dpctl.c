@@ -1277,13 +1277,12 @@ parse_match(char *str, struct ofl_match_header **match) {
 }
 
 static int
-parse_set_field(char *str, struct ofl_action_set_field *act) {
+parse_set_field(char *token, struct ofl_action_set_field *act) {
        
-     char *token  = NULL;
     
-    if (strncmp(str, MATCH_DL_SRC KEY_VAL, strlen(MATCH_DL_SRC KEY_VAL)) == 0) {
+    if (strncmp(token, MATCH_DL_SRC KEY_VAL, strlen(MATCH_DL_SRC KEY_VAL)) == 0) {
         uint8_t* dl_src = xmalloc(6);           
-        if (parse_dl_addr(str + strlen(MATCH_DL_SRC KEY_VAL), dl_src)) {
+        if (parse_dl_addr(token + strlen(MATCH_DL_SRC KEY_VAL), dl_src)) {
                 ofp_fatal(0, "Error parsing dl_src: %s.", token);
         }else{ 
                 act->field = (struct ofl_match_tlv*) malloc(sizeof(struct ofl_match_tlv));
@@ -1292,9 +1291,9 @@ parse_set_field(char *str, struct ofl_action_set_field *act) {
             }     
         return 0;
     }
-    if (strncmp(str, MATCH_DL_DST KEY_VAL, strlen(MATCH_DL_DST KEY_VAL)) == 0) {
+    if (strncmp(token, MATCH_DL_DST KEY_VAL, strlen(MATCH_DL_DST KEY_VAL)) == 0) {
         uint8_t* dl_dst = xmalloc(6);           
-        if (parse_dl_addr(str + strlen(MATCH_DL_SRC KEY_VAL), dl_dst)) {
+        if (parse_dl_addr(token + strlen(MATCH_DL_SRC KEY_VAL), dl_dst)) {
                 ofp_fatal(0, "Error parsing dl_dst: %s.", token);
         }else{ 
                 act->field = (struct ofl_match_tlv*) malloc(sizeof(struct ofl_match_tlv));
@@ -1326,9 +1325,9 @@ parse_set_field(char *str, struct ofl_action_set_field *act) {
         }
         return 0;
     }
-    if (strncmp(str, MATCH_DL_TYPE KEY_VAL, strlen(MATCH_DL_TYPE KEY_VAL)) == 0) {
+    if (strncmp(token, MATCH_DL_TYPE KEY_VAL, strlen(MATCH_DL_TYPE KEY_VAL)) == 0) {
         uint16_t* dl_type = xmalloc(sizeof(uint16_t));
-        if (parse16(str + strlen(MATCH_DL_TYPE KEY_VAL), NULL, 0, 0xffff, dl_type)) {
+        if (parse16(token + strlen(MATCH_DL_TYPE KEY_VAL), NULL, 0, 0xffff, dl_type)) {
             ofp_fatal(0, "Error parsing dl_type: %s.", token);
         }
         else { 
@@ -1362,9 +1361,9 @@ parse_set_field(char *str, struct ofl_action_set_field *act) {
         }
         return 0;
     }
-    if (strncmp(str, MATCH_TP_SRC KEY_VAL, strlen(MATCH_TP_SRC KEY_VAL)) == 0) {
+    if (strncmp(token, MATCH_TP_SRC KEY_VAL, strlen(MATCH_TP_SRC KEY_VAL)) == 0) {
         uint16_t* tp_src = xmalloc(2);
-        if (parse16(str + strlen(MATCH_TP_SRC KEY_VAL), NULL, 0, 0xffff, tp_src)) {
+        if (parse16(token+ strlen(MATCH_TP_SRC KEY_VAL), NULL, 0, 0xffff, tp_src)) {
             ofp_fatal(0, "Error parsing tcp_src: %s.", token);
         }else{ 
             act->field = (struct ofl_match_tlv*) malloc(sizeof(struct ofl_match_tlv));
@@ -1373,9 +1372,9 @@ parse_set_field(char *str, struct ofl_action_set_field *act) {
         }     
         return 0;
     }
-    if (strncmp(str, MATCH_TP_DST KEY_VAL, strlen(MATCH_TP_DST KEY_VAL)) == 0) {
+    if (strncmp(token, MATCH_TP_DST KEY_VAL, strlen(MATCH_TP_DST KEY_VAL)) == 0) {
         uint16_t* tp_dst = xmalloc(2);
-        if (parse16(str + strlen(MATCH_TP_SRC KEY_VAL), NULL, 0, 0xffff, tp_dst)) {
+        if (parse16(token + strlen(MATCH_TP_SRC KEY_VAL), NULL, 0, 0xffff, tp_dst)) {
             ofp_fatal(0, "Error parsing tcp_src: %s.", token);
         }else{ 
             act->field = (struct ofl_match_tlv*) malloc(sizeof(struct ofl_match_tlv));
@@ -1384,7 +1383,7 @@ parse_set_field(char *str, struct ofl_action_set_field *act) {
         }     
         return 0;
     }
-        
+    ofp_fatal(0, "Error parsing set_field arg: %s.", token);   
 }
 
 static void
@@ -1420,7 +1419,6 @@ parse_action(uint16_t type, char *str, struct ofl_action_header **act) {
             break;
         }
         case (OFPAT_SET_FIELD):{
-            char *token, *saveptr = NULL;
             struct ofl_action_set_field *a = xmalloc(sizeof (struct ofl_action_set_field));
             if (parse_set_field(str, a)) {
                 ofp_fatal(0, "Error parsing field in set_field action: %s.", str);

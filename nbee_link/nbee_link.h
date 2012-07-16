@@ -46,7 +46,7 @@ struct packet_fields {
 #ifdef __cplusplus
 extern "C"
 #endif
-int nblink_initialize();
+int nblink_initialize(void);
 
 #ifdef __cplusplus
 extern "C"

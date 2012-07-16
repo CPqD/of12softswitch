@@ -151,8 +151,6 @@ static int
 ofl_msg_pack_packet_in(struct ofl_msg_packet_in *msg, uint8_t **buf, size_t *buf_len) {
     struct ofp_packet_in *packet_in;
     uint8_t *ptr;
-    size_t match_len;
-
     
     *buf_len = sizeof(struct ofp_packet_in) + ROUND_UP(msg->match->length - 4 ,8) + msg->data_length + 2;
     *buf     = (uint8_t *)malloc(*buf_len);
@@ -163,7 +161,7 @@ ofl_msg_pack_packet_in(struct ofl_msg_packet_in *msg, uint8_t **buf, size_t *buf
     packet_in->table_id    =       msg->table_id;
 
     ptr = (*buf) + (sizeof(struct ofp_packet_in) - 4);
-    match_len = ofl_structs_match_pack(msg->match,&(packet_in->match),ptr, NETWORK_ORDER, NULL);
+    ofl_structs_match_pack(msg->match,&(packet_in->match),ptr, NETWORK_ORDER, NULL);
     ptr = (*buf) + ROUND_UP((sizeof(struct ofp_packet_in)-4) + msg->match->length,8);
     /*padding bytes*/
 

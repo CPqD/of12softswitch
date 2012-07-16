@@ -86,7 +86,7 @@ stp_local_packet_cb(struct relay *r, void *stp_)
         || !eth_addr_equals(eth->eth_dst, stp_eth_addr)) {
         return false;
     }
-
+    port_no = 0;
     /*TODO: Removed to port to OpenFlow 1.2 */
    // port_no = ntohs(opi->in_port);
     //if (port_no >= STP_MAX_PORTS) {

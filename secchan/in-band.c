@@ -152,6 +152,7 @@ in_band_local_packet_cb(struct relay *r, void *in_band_)
         return false;
     }
     /*TODO: OFP 1.2 change */
+    in_port = 0;
     //in_port = ntohs(opi->in_port);
     get_ofp_packet_payload(opi, &payload);
     flow_extract(&payload, in_port, &flow);
