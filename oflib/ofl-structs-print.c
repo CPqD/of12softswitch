@@ -155,13 +155,13 @@ void
 print_oxm_tlv(FILE *stream, struct ofl_match_tlv *f, size_t *size){
                 
                 if (f->header == OXM_OF_IN_PORT){
-                    fprintf(stream, "in_port=%d",(uint32_t) *f->value);
+                    fprintf(stream, "in_port=%d",*((uint32_t*) f->value));
                     *size -= 8;   
                     if (*size > 4)                                  
                         fprintf(stream, ", ");
                 }
                 else if (f->header == OXM_OF_IN_PHY_PORT){
-                            fprintf(stream, "in_phy_port=%d",(uint32_t) *f->value);
+                            fprintf(stream, "in_phy_port=%d",*((uint32_t*) f->value));
                             *size -= 8;   
                             if (*size > 4)                                  
                                 fprintf(stream, ", ");
@@ -171,7 +171,7 @@ print_oxm_tlv(FILE *stream, struct ofl_match_tlv *f, size_t *size){
                                 fprintf(stream, "vlan_vid= none");
                             else if ((uint16_t) *f->value == OFPVID_PRESENT)
                                 fprintf(stream, "vlan_vid= present");
-                            else fprintf(stream, "vlan_vid= %d",(uint16_t) *f->value);
+                            else fprintf(stream, "vlan_vid= %d",*((uint16_t*) f->value));
                             *size -= 6;                                
                             if (*size > 4)                                
                                 fprintf(stream, ", ");
@@ -191,37 +191,37 @@ print_oxm_tlv(FILE *stream, struct ofl_match_tlv *f, size_t *size){
                                 fprintf(stream, ", ");
                 }
                 else if (f->header == OXM_OF_TCP_SRC){
-                            fprintf(stream, "tcp_src=%d",(uint16_t) *f->value);
+                            fprintf(stream, "tcp_src=%d",*((uint16_t*) f->value));
                             *size -= 6;                                
                             if (*size > 4)                                
                                 fprintf(stream, ", ");
                 }
                 else if (f->header == OXM_OF_TCP_DST){
-                            fprintf(stream, "tcp_dst=%d",(uint16_t) *f->value);
+                            fprintf(stream, "tcp_dst=%d",*((uint16_t*) f->value));
                             *size -= 6;                                
                             if (*size > 4)                                
                                 fprintf(stream, ", ");
                 }
                 else if (f->header == OXM_OF_UDP_SRC){
-                            fprintf(stream, "udp_src=%d",(uint16_t) *f->value);
+                            fprintf(stream, "udp_src=%d",*((uint16_t*) f->value));
                             *size -= 6;                                
                             if (*size > 4)                                
                                 fprintf(stream, ", ");
                 }
                 else if (f->header == OXM_OF_UDP_DST){
-                            fprintf(stream, "udp_dst=%d",(uint16_t) *f->value);
+                            fprintf(stream, "udp_dst=%d",*((uint16_t*) f->value));
                             *size -= 6;                                
                             if (*size > 4)                                
                                 fprintf(stream, ", ");
                 }
                 else if (f->header == OXM_OF_SCTP_SRC){
-                            fprintf(stream, "sctp_src=%d",(uint16_t) *f->value);
+                            fprintf(stream, "sctp_src=%d",*((uint16_t*) f->value));
                             *size -= 6;                                
                             if (*size > 4)                                
                                 fprintf(stream, ", ");
                 }
                 else if (f->header == OXM_OF_SCTP_DST){
-                            fprintf(stream, "sctp_dst=%d",(uint16_t) *f->value);
+                            fprintf(stream, "sctp_dst=%d",*((uint16_t*) f->value));
                             *size -= 6;                                
                             if (*size > 4)                                
                                 fprintf(stream, ", ");

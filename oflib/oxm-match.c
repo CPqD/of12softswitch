@@ -279,13 +279,13 @@ parse_oxm_entry(struct ofl_match *match, const struct oxm_field *f,
         case OFI_OXM_OF_IPV4_DST:
         case OFI_OXM_OF_ARP_TPA:
         case OFI_OXM_OF_ARP_SPA:
-             ofl_structs_match_put32(match, f->header, get_unaligned_u32(value));
+             ofl_structs_match_put32(match, f->header, ntohl(*((uint32_t*) value)));
              return 0;
         case OFI_OXM_OF_IPV4_DST_W:
         case OFI_OXM_OF_IPV4_SRC_W:
         case OFI_OXM_OF_ARP_SPA_W:
         case OFI_OXM_OF_ARP_TPA_W:
-             ofl_structs_match_put32m(match, f->header, get_unaligned_u32(value),get_unaligned_u32(mask));
+             ofl_structs_match_put32m(match, f->header, ntohl(*((uint32_t*) value)), ntohl(*((uint32_t*) mask)));
              return 0;              
         case OFI_OXM_OF_ARP_SHA:
         case OFI_OXM_OF_ARP_THA:
@@ -309,11 +309,11 @@ parse_oxm_entry(struct ofl_match *match, const struct oxm_field *f,
             return 0;
         }
         case OFI_OXM_OF_IPV6_FLABEL:{
-            ofl_structs_match_put32(match, f->header, get_unaligned_u32(value));
+            ofl_structs_match_put32(match, f->header, ntohl(*((uint32_t*) value)));
             return 0;  
         }
         case OFI_OXM_OF_IPV6_FLABEL_W:{
-            ofl_structs_match_put32m(match, f->header, get_unaligned_u32(value),get_unaligned_u32(mask));
+            ofl_structs_match_put32m(match, f->header, ntohl(*((uint32_t*) value)), ntohl(*((uint32_t*) mask)));
             return 0;
         }
         /* TCP header. */
@@ -325,7 +325,7 @@ parse_oxm_entry(struct ofl_match *match, const struct oxm_field *f,
             /* SCTP header. */
         case OFI_OXM_OF_SCTP_SRC:
         case OFI_OXM_OF_SCTP_DST:
-                ofl_structs_match_put16(match, f->header, get_unaligned_u16(value));
+                ofl_structs_match_put16(match, f->header, ntohs(*((uint16_t*) value)));
                 return 0;
            
             /* ICMP header. */
@@ -356,7 +356,7 @@ parse_oxm_entry(struct ofl_match *match, const struct oxm_field *f,
             return 0;
         }
         case OFI_OXM_OF_MPLS_LABEL:
-                ofl_structs_match_put32(match, f->header, get_unaligned_u32(value));
+                ofl_structs_match_put32(match, f->header, ntohl(*((uint32_t*) value)));
                 return 0;
         case OFI_OXM_OF_MPLS_TC:{
             uint8_t *v = (uint8_t*) value;
