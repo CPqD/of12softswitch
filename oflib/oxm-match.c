@@ -279,7 +279,7 @@ parse_oxm_entry(struct ofl_match *match, const struct oxm_field *f,
         case OFI_OXM_OF_IPV4_DST:
         case OFI_OXM_OF_ARP_TPA:
         case OFI_OXM_OF_ARP_SPA:
-             ofl_structs_match_put32(match, f->header, ntohl(*((uint32_t*) value)));
+             ofl_structs_match_put32(match, f->header, *((uint32_t*) value));
              return 0;
         case OFI_OXM_OF_IPV4_DST_W:
         case OFI_OXM_OF_IPV4_SRC_W:
