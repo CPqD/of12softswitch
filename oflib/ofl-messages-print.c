@@ -308,6 +308,9 @@ ofl_msg_print_stats_request(struct ofl_msg_stats_request_header *msg, FILE *stre
         case OFPST_GROUP_DESC: {
             break;
         }
+        case OFPST_GROUP_FEATURES:{
+            break;
+        }
         case OFPST_EXPERIMENTER: {
             ofl_msg_print_stats_request_experimenter((struct ofl_msg_stats_request_experimenter *)msg, stream);
         }
@@ -411,6 +414,13 @@ ofl_msg_print_stats_reply_group_desc(struct ofl_msg_stats_reply_group_desc *msg,
     fprintf(stream, "]");
 }
 
+static void ofl_msg_print_stats_reply_group_features(struct ofl_msg_stats_reply_group_features *msg, FILE *stream){
+
+    fprintf(stream, ", types=\"%d\", capabilities=\"%d",
+                  msg->types, msg->capabilities);
+
+}
+
 static void
 ofl_msg_print_stats_reply_experimenter(struct ofl_msg_stats_reply_experimenter *msg, FILE *stream) {
     fprintf(stream, ", exp_id=\"");
@@ -468,6 +478,10 @@ ofl_msg_print_stats_reply(struct ofl_msg_stats_reply_header *msg, FILE *stream, 
             ofl_msg_print_stats_reply_group_desc((struct ofl_msg_stats_reply_group_desc *)msg, stream, exp);
             break;
         }
+        case OFPST_GROUP_FEATURES:{
+            ofl_msg_print_stats_reply_group_features((struct ofl_msg_stats_reply_group_features *)msg, stream);
+            break;
+        }
         case OFPST_EXPERIMENTER: {
             ofl_msg_print_stats_reply_experimenter((struct ofl_msg_stats_reply_experimenter *)msg, stream);
             break;
@@ -500,6 +514,12 @@ ofl_msg_print_queue_get_config_reply(struct ofl_msg_queue_get_config_reply *msg,
     fprintf(stream, "]}");
 }
 
+static void 
+ofl_msg_print_role_msg(struct ofl_msg_role_request *msg, FILE *stream){
+    
+    fprintf(stream, "{role= %d, generation_id= %lld}", msg->role, msg->generation_id);
+
+}
 
 char *
 ofl_msg_to_string(struct ofl_msg_header *msg, struct ofl_exp *exp) {
@@ -559,6 +579,11 @@ ofl_msg_print(FILE *stream, struct ofl_msg_header *msg, struct ofl_exp *exp) {
         case OFPT_BARRIER_REQUEST: { return; }
         case OFPT_BARRIER_REPLY: { return; }
 
+        /*Role messages */
+        case OFPT_ROLE_REQUEST:
+        case OFPT_ROLE_REPLY:{
+            ofl_msg_print_role_msg((struct ofl_msg_role_request*)msg, stream);        
+        }
         /* Queue Configuration messages. */
         case OFPT_QUEUE_GET_CONFIG_REQUEST: { ofl_msg_print_queue_get_config_request((struct ofl_msg_queue_get_config_request *)msg, stream); return; }
         case OFPT_QUEUE_GET_CONFIG_REPLY: { ofl_msg_print_queue_get_config_reply((struct ofl_msg_queue_get_config_reply *)msg, stream); return; }

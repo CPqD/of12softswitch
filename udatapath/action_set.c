@@ -70,6 +70,7 @@ action_set_order(struct ofl_action_header *act) {
     switch (act->type) {
         case (OFPAT_COPY_TTL_OUT):   return 40;
         case (OFPAT_COPY_TTL_IN):    return 10;
+        case (OFPAT_SET_FIELD):      return 60;
         case (OFPAT_SET_MPLS_TTL):   return 60;
         case (OFPAT_DEC_MPLS_TTL):   return 50;
         case (OFPAT_PUSH_VLAN):      return 30;
@@ -80,6 +81,7 @@ action_set_order(struct ofl_action_header *act) {
         case (OFPAT_GROUP):          return 80;
         case (OFPAT_SET_NW_TTL):     return 60;
         case (OFPAT_DEC_NW_TTL):     return 50;
+        case (OFPAT_OUTPUT):         return 90;
         case (OFPAT_EXPERIMENTER):   return 75;
         default:                     return 79;
     }

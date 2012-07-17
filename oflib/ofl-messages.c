@@ -71,6 +71,7 @@ ofl_msg_free_stats_request(struct ofl_msg_stats_request_header *msg, struct ofl_
         case OFPST_QUEUE:
         case OFPST_GROUP:
         case OFPST_GROUP_DESC:
+        case OFPST_GROUP_FEATURES:
             break;
         case OFPST_EXPERIMENTER: {
             if (exp == NULL || exp->stats == NULL || exp->stats->req_free == NULL) {
@@ -146,6 +147,9 @@ ofl_msg_free_stats_reply(struct ofl_msg_stats_reply_header *msg, struct ofl_exp 
             }
             exp->stats->reply_free(msg);
             return 0;
+        }
+        case OFPST_GROUP_FEATURES:{
+            break;
         }
         default: {
             return -1;
@@ -238,6 +242,10 @@ ofl_msg_free(struct ofl_msg_header *msg, struct ofl_exp *exp) {
         case OFPT_BARRIER_REQUEST:
         case OFPT_BARRIER_REPLY:
         case OFPT_QUEUE_GET_CONFIG_REQUEST: {
+            break;
+        }
+        case OFPT_ROLE_REPLY:
+        case OFPT_ROLE_REQUEST:{
             break;
         }
         case OFPT_QUEUE_GET_CONFIG_REPLY: {
