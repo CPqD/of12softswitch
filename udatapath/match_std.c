@@ -254,13 +254,28 @@ packet_match(struct ofl_match *flow_match, struct ofl_match *packet){
                     } 
                     case (sizeof(uint32_t)):{ 
                         if (has_mask){
-                            if (pkt_mask32(f->value,f->value + field_len, packet_f->value) == 0){
-                              return false;
+                            if (f->header == OXM_OF_IPV4_DST || f->header == OXM_OF_IPV4_SRC
+							    ||f->header == OXM_OF_ARP_SPA || f->header == OXM_OF_ARP_TPA){
+							    if (matches_mask32(f->value,f->value + field_len, packet_f->value) == 0){
+                                     return false;
+                                }
+                            }     
+                            else 
+                                if (pkt_mask32(f->value,f->value + field_len, packet_f->value) == 0){
+                                    return false;
                             }
                         }
-                        else 
-                            if (pkt_match_32(f->value, packet_f->value) == 0){
-                              return false;
+                        else
+                            if (f->header == OXM_OF_IPV4_DST || f->header == OXM_OF_IPV4_SRC
+							    ||f->header == OXM_OF_ARP_SPA || f->header == OXM_OF_ARP_TPA){
+							    if (matches_32(f->value, packet_f->value) == 0){
+                                     return false;
+                                }
+                            }
+                            
+                            else 
+                                if (pkt_match_32(f->value, packet_f->value) == 0){
+                                    return false;
                             }
                         break;
                     }
