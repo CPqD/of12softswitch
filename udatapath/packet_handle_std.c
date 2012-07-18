@@ -100,9 +100,9 @@ packet_handle_std_clone(struct packet *pkt, struct packet_handle_std *handle UNU
     struct packet_handle_std *clone = xmalloc(sizeof(struct packet_handle_std));
 
     clone->pkt = pkt;
+    clone->proto = xmalloc(sizeof(struct protocols_std));
     hmap_init(&clone->match.match_fields);
     clone->valid = false;
-
     // TODO Zoltan: if handle->valid, then match could be memcpy'd, and protocol
     //              could be offset
     packet_handle_std_validate(clone);
