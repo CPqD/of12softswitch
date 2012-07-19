@@ -85,33 +85,33 @@ set_field(struct packet *pkt, struct ofl_action_set_field *act ) {
                struct ip_header *ipv4 = pkt->handle_std->proto->ipv4;
                 if (pkt->handle_std->proto->tcp != NULL) {
                     struct tcp_header *tcp = pkt->handle_std->proto->tcp;
-                    tcp->tcp_csum = recalc_csum32(tcp->tcp_csum, ipv4->ip_src,(uint32_t) *act->field->value);
+                    tcp->tcp_csum = recalc_csum32(tcp->tcp_csum, ipv4->ip_src,htonl(*((uint32_t*) act->field->value)));
                 } else if (pkt->handle_std->proto->udp != NULL) {
                     struct udp_header *udp = pkt->handle_std->proto->udp;
-                    udp->udp_csum = recalc_csum32(udp->udp_csum, ipv4->ip_src, (uint32_t) *act->field->value);
+                    udp->udp_csum = recalc_csum32(udp->udp_csum, ipv4->ip_src, htonl(*((uint32_t*) act->field->value)));
                 
                 }
                 if (iter->header == OXM_OF_IPV4_SRC)
-                     ipv4->ip_csum = recalc_csum32(ipv4->ip_csum, ipv4->ip_src, (uint32_t) *act->field->value);
+                     ipv4->ip_csum = recalc_csum32(ipv4->ip_csum, ipv4->ip_src, htonl(*((uint32_t*) act->field->value)));
                 else  
-                     ipv4->ip_csum = recalc_csum32(ipv4->ip_csum, ipv4->ip_dst, (uint32_t) *act->field->value);  
+                     ipv4->ip_csum = recalc_csum32(ipv4->ip_csum, ipv4->ip_dst, htonl(*((uint32_t*) act->field->value)));  
                pkt->handle_std->valid = false;         	       
     	    }
     	    if (iter->header == OXM_OF_TCP_SRC){
     	         struct tcp_header *tcp = pkt->handle_std->proto->tcp;
-    	         tcp->tcp_csum = recalc_csum16(tcp->tcp_csum, tcp->tcp_src, htons((uint16_t) *act->field->value));
+    	         tcp->tcp_csum = recalc_csum16(tcp->tcp_csum, tcp->tcp_src, htons(*((uint16_t*) act->field->value)));
     	    }
     	    else if (iter->header == OXM_OF_TCP_DST){
     	         struct tcp_header *tcp = pkt->handle_std->proto->tcp;
-    	         tcp->tcp_csum = recalc_csum16(tcp->tcp_csum, tcp->tcp_dst, htons((uint16_t) *act->field->value));
+    	         tcp->tcp_csum = recalc_csum16(tcp->tcp_csum, tcp->tcp_dst, htons(*((uint16_t*) act->field->value)));
     	    }
     	    else if (iter->header == OXM_OF_UDP_SRC){
     	        struct udp_header *udp = pkt->handle_std->proto->udp;
-    	        udp->udp_csum = recalc_csum16(udp->udp_csum, udp->udp_src, htons((uint16_t) *act->field->value));
+    	        udp->udp_csum = recalc_csum16(udp->udp_csum, udp->udp_src, htons(*((uint16_t*) act->field->value)));
     	    }
     	    else if (iter->header == OXM_OF_UDP_DST){
     	        struct udp_header *udp = pkt->handle_std->proto->udp;
-    	        udp->udp_csum = recalc_csum16(udp->udp_csum, udp->udp_dst, htons((uint16_t) *act->field->value));
+    	        udp->udp_csum = recalc_csum16(udp->udp_csum, udp->udp_dst, htons(*((uint16_t*) act->field->value)));
     	    }
             /* Found the field, lets re-write it!! */
     	    memcpy(((uint8_t*)pkt->buffer->data + iter->pos) , act->field->value , OXM_LENGTH(iter->header));
