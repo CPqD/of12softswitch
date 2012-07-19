@@ -19,24 +19,23 @@ Getting Started
 Dependencies
 ------------
 
-The code was tested on Ubuntu 11.10. In order to compile the switch your system
-must have the following libraries.
+The code was tested on Ubuntu 11.10. In order to compile the switch in your 
+system you need to install the following packages:
 
     $ sudo apt-get install libpcap-dev libxerces-c2-dev libpcre3-dev flex bison
 
 Pre-Building
 ------------
 
-Add the shared libraries present in netbee-dev to your /usr/local/lib directory.
-You should have root permission to do this:
+Add the shared libraries present in netbee-dev to your `/usr/local/lib` directory.
 
     $ sudo cp netbee-dev/libn*.so /usr/local/lib
 
-Run ldconfig:
+Run `ldconfig`:
 
     $ sudo ldconfig
 
-Put the folder netbee-dev/nbee in the /usr/include:
+Put the folder `netbee-dev/nbee` in the `/usr/include`:
 
     $ sudo cp -R netbee-dev/nbee /usr/include
 
@@ -44,7 +43,7 @@ Put the folder netbee-dev/nbee in the /usr/include:
 Building
 --------
 
-To build, run the following commands in the of12softswitch directory:
+To build, run the following commands in the `of12softswitch` directory:
 
     $ ./boot.sh
     $ ./configure
@@ -59,7 +58,7 @@ Start the datapath:
 
 This will start the datapath, with the given datapath id, and interace list,
 opening a passive tcp connection on the given port. For a complete list of
-options, use the --help argument.
+options, use the `--help` argument.
 
 Start the secure channel:
 
@@ -67,14 +66,14 @@ Start the secure channel:
 
 This will open TCP connections to both the switch and the controller, relaying
 OpenFlow protocol messages between the two. For a complete list of options,
-use the --help argument.
+use the `--help` argument.
 
-You can send requests to the switch using the dpctl utility:
+You can send requests to the switch using the `dpctl` utility:
 
     $ cd utilities
     $ ./dpctl tcp:<switch-host>:<switch-port> stats-flow table=0
 
-For a complete list of commands and arguments, use the --help argument.
+For a complete list of commands and arguments, use the `--help` argument.
 
 Contribute
 ==========
@@ -88,16 +87,10 @@ License
 OpenFlow 1.2 Software Switch is released under the BSD license (BSD-like for
 code from the original Stanford switch).
 
-References
-==========
-
-[1] OpenFlow: http://www.openflow.org/
-[2] ONF:      http://www.opennetworkingfoundation.org/
-
 Contact
 =======
 
 E-mail: Eder Leao Fernandes (ederlf@cpqd.com.br)
 
-[ofp12]: https://www.opennetworking.org/images/stories/downloads/openflow/openflow-spec-v1.2.pdf
+[ofp12]: https://www.opennetworking.org/images/stories/downloads/specification/openflow-spec-v1.2.pdf
 [ericssonsw11]: https://github.com/TrafficLab/of11softswitch
