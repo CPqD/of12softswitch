@@ -1,9 +1,9 @@
 OpenFlow 1.2 Software Switch
-----------------------------
+============================
 
-This is an OpenFlow 1.2 [1] compatible user-space software switch
-implementation. The code is based on the Ericsson TrafficLab 1.1 softswitch
-implementation [2], with changes in the forwarding plane to support
+This is an [OpenFlow 1.2][ofp12] compatible user-space software switch
+implementation. The code is based on the [Ericsson TrafficLab 1.1 softswitch
+implementation][ericssonsw11], with changes in the forwarding plane to support
 OpenFlow 1.2.
 
 The following components are available in the release:
@@ -12,47 +12,49 @@ The following components are available in the release:
   - oflib:      a library for converting to/from 1.2 wire format
   - dpctl:      a tool for configuring the switch from the console
 
-[1] https://www.opennetworking.org/images/stories/downloads/openflow/openflow-spec-v1.2.pdf
-[2] https://github.com/TrafficLab/of11softswitch
-
 
 Getting Started
----------------
+===============
 
 Dependencies
-============
+------------
 
 The code was tested on Ubuntu 11.10. In order to compile the switch your system
 must have the following libraries.
 
-$ sudo apt-get install libpcap-dev libxerces-c2-dev libpcre3-dev flex bison
+    $ sudo apt-get install libpcap-dev libxerces-c2-dev libpcre3-dev flex bison
 
 Pre-Building
-============
+------------
 
 Add the shared libraries present in netbee-dev to your /usr/local/lib directory.
 You should have root permission to do this:
+
     $ sudo cp netbee-dev/libn*.so /usr/local/lib
 
 Run ldconfig:
+
     $ sudo ldconfig
 
 Put the folder netbee-dev/nbee in the /usr/include:
+
     $ sudo cp -R netbee-dev/nbee /usr/include
 
 
 Building
-========
+--------
 
 To build, run the following commands in the of12softswitch directory:
+
     $ ./boot.sh
     $ ./configure
     $ make
 
 Running
-=======
+-------
 
 Start the datapath:
+
     $ sudo udatapath/ofdatapath --datapath-id=<dpid> --interfaces=<if-list> ptcp:<port>
 
 This will start the datapath, with the given datapath id, and interace list,
@@ -60,6 +62,7 @@ opening a passive tcp connection on the given port. For a complete list of
 options, use the --help argument.
 
 Start the secure channel:
+
     $ secchan/ofprotocol tcp:<switch-host>:<switch-port> tcp:<ctrl-host>:<ctrl-port>
 
 This will open TCP connections to both the switch and the controller, relaying
@@ -67,33 +70,34 @@ OpenFlow protocol messages between the two. For a complete list of options,
 use the --help argument.
 
 You can send requests to the switch using the dpctl utility:
+
     $ cd utilities
     $ ./dpctl tcp:<switch-host>:<switch-port> stats-flow table=0
 
 For a complete list of commands and arguments, use the --help argument.
 
 Contribute
-----------
+==========
 
 Please submit your bug reports, fixes and suggestions as pull requests on
 github, or by contacting us directly.
 
-
 License
--------
+=======
 
 OpenFlow 1.2 Software Switch is released under the BSD license (BSD-like for
 code from the original Stanford switch).
 
-
 References
-----------
+==========
 
 [1] OpenFlow: http://www.openflow.org/
 [2] ONF:      http://www.opennetworkingfoundation.org/
 
-
 Contact
--------
+=======
 
 E-mail: Eder Leao Fernandes (ederlf@cpqd.com.br)
+
+[ofp12]: https://www.opennetworking.org/images/stories/downloads/openflow/openflow-spec-v1.2.pdf
+[ericssonsw11]: https://github.com/TrafficLab/of11softswitch
