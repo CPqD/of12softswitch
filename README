@@ -1,9 +1,10 @@
 OpenFlow 1.2 Software Switch
 ----------------------------
 
-This is an OpenFlow 1.2 [1] compatible user-space software switch implementation.
-The code is based on the Ericsson TrafficLab 1.1 softswitch implementation [2], with
-changes in the forwarding plane to support OpenFlow 1.2.
+This is an OpenFlow 1.2 [1] compatible user-space software switch
+implementation. The code is based on the Ericsson TrafficLab 1.1 softswitch
+implementation [2], with changes in the forwarding plane to support
+OpenFlow 1.2.
 
 The following components are available in the release:
   - ofdatapath: the switch implementation
@@ -21,74 +22,53 @@ Getting Started
 Dependencies
 ============
 
-The code was tested on Ubuntu 11.10.
-In order to compile the switch your 
-system must have the following libraries
+The code was tested on Ubuntu 11.10. In order to compile the switch your system
+must have the following libraries.
 
-Libpcap 
-# sudo apt-get install libpcap-dev
-----------------------------------------
-Xerces-C version 2.8.0
-# sudo apt-get install libxerces-c2-dev
-----------------------------------------
-libpcre
-# sudo apt-get install libpcre3-dev
-----------------------------------------
-A recent version of flex and bison
-# sudo apt-get install flex
-# sudo apt-get install bison
+$ sudo apt-get install libpcap-dev libxerces-c2-dev libpcre3-dev flex bison
 
 Pre-Building
 ============
 
-You should follow this steps before building 
+Add the shared libraries present in netbee-dev to your /usr/local/lib directory.
+You should have root permission to do this:
+    $ sudo cp netbee-dev/libn*.so /usr/local/lib
 
-1 - Add the shared libraries present in netbee-dev to 
-your /usr/local/lib directory. You should have root 
-permission to do this.
-# mv libn*.so /usr/local/lib
+Run ldconfig:
+    $ sudo ldconfig
 
-2 - Run ldconfig
-# ldconfig  
-
-3 - Put the folder netbee-dev/nbee in the /usr/include
-# mv -r netbee-dev/nbee /usr/include
-
+Put the folder netbee-dev/nbee in the /usr/include:
+    $ sudo cp -R netbee-dev/nbee /usr/include
 
 
 Building
 ========
 
-To build, run the following commands in the of11softswitch directory:
-
-    ./boot.sh
-    ./configure
-    make
+To build, run the following commands in the of12softswitch directory:
+    $ ./boot.sh
+    $ ./configure
+    $ make
 
 Running
 =======
 
-To start the datapath, run the following commands:
-
-    sudo udatapath/ofdatapath --datapath-id=<dpid> --interfaces=<if-list> ptcp:<port>
+Start the datapath:
+    $ sudo udatapath/ofdatapath --datapath-id=<dpid> --interfaces=<if-list> ptcp:<port>
 
 This will start the datapath, with the given datapath id, and interace list,
 opening a passive tcp connection on the given port. For a complete list of
 options, use the --help argument.
 
-To start the secure channel, run the following commands:
+Start the secure channel:
+    $ secchan/ofprotocol tcp:<switch-host>:<switch-port> tcp:<ctrl-host>:<ctrl-port>
 
-    secchan/ofprotocol tcp:<switch-host>:<switch-port> tcp:<ctrl-host>:<ctrl-port>
-
-This will open tcp connections to both the switch and the controller, relaying
+This will open TCP connections to both the switch and the controller, relaying
 OpenFlow protocol messages between the two. For a complete list of options,
 use the --help argument.
 
-
 You can send requests to the switch using the dpctl utility:
-
-    cd utilities
-    ./dpctl tcp:<switch-host>:<switch-port> stats-flow table=0
+    $ cd utilities
+    $ ./dpctl tcp:<switch-host>:<switch-port> stats-flow table=0
 
 For a complete list of commands and arguments, use the --help argument.
 
@@ -102,8 +82,8 @@ github, or by contacting us directly.
 License
 -------
 
-OpenFlow 1.2 Software Switch is released under the BSD license (BSD-like
-for code from the original Stanford switch).
+OpenFlow 1.2 Software Switch is released under the BSD license (BSD-like for
+code from the original Stanford switch).
 
 
 References
@@ -117,4 +97,3 @@ Contact
 -------
 
 E-mail: Eder Leao Fernandes (ederlf@cpqd.com.br)
-        
