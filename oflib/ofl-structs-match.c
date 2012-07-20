@@ -26,7 +26,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  *
- * Author: Eder Leão Fernandes <ederlf@cpqd.com->br>
  */
 
 #include "ofl-structs.h"

@@ -34,7 +34,6 @@
 /* The original Stanford code has been modified during the implementation of
  * the OpenFlow 1.1 userspace switch.
  *
- * Author: Zoltán Lajos Kis <zoltan.lajos.kis@ericsson.com>
  */
 
 #ifndef DATAPATH_H
