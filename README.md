@@ -16,26 +16,37 @@ The following components are available in the release:
 Getting Started
 ===============
 
-Dependencies
-------------
-
-The code was tested on Ubuntu 11.10. In order to compile the switch in your 
-system you need to install the following packages:
-
-    $ sudo apt-get install libpcap-dev libxerces-c2-dev libpcre3-dev flex bison
-
 Pre-Building
 ------------
 
-Add the shared libraries present in netbee-dev to your `/usr/local/lib` directory.
+The software switch makes use of the Netbee library to parse packets, therefore library files needed to build  
+the switch.
 
-    $ sudo cp netbee-dev/libn*.so /usr/local/lib
+To compile Netbee on your system your  
+system you need to install the following packages:
+
+    $ sudo apt-get install cmake libpcap-dev libxerces-c2-dev libpcre3-dev flex bison  
+
+Download the source code on http://www.nbee.org/download/nbeesrc-12-05-16.php
+    
+Create the build system  
+  
+    $ cd nbeesrc/src  
+    $ cmake.
+
+Compile  
+    
+    $ make
+
+Add the shared libraries built in `/nbeesrc/bin/` to your `/usr/local/lib` directory.  
+
+    $ sudo cp nbeesrc/bin/libn*.so /usr/local/lib
 
 Run `ldconfig`:
 
     $ sudo ldconfig
 
-Put the folder `netbee-dev/nbee` in the `/usr/include`:
+Put the folder `nbeesrc/include` in the `/usr/include`:
 
     $ sudo cp -R netbee-dev/nbee /usr/include
 
@@ -94,3 +105,4 @@ E-mail: Eder Leao Fernandes (ederlf@cpqd.com.br)
 
 [ofp12]: https://www.opennetworking.org/images/stories/downloads/specification/openflow-spec-v1.2.pdf
 [ericssonsw11]: https://github.com/TrafficLab/of11softswitch
+
