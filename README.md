@@ -48,7 +48,7 @@ Run `ldconfig`:
 
 Put the folder `nbeesrc/include` in the `/usr/include`:
 
-    $ sudo cp -R netbee-dev/nbee /usr/include
+    $ sudo cp -R nbeesrc/include /usr/include
 
 
 Building
