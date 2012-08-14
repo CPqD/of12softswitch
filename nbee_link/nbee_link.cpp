@@ -7,7 +7,7 @@
 
 #include <iostream>
 #include <string.h>
-#include <nbee/nbee.h>
+#include <nbee.h>
 #include <netinet/in.h>
 
 #include "nbee_link.h"
