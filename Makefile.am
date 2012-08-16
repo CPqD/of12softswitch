@@ -68,3 +68,4 @@ include debian/automake.mk
 
 netpdldir = $(datadir)/openflow
 netpdl_DATA = customnetpdl.xml
+AM_CPPFLAGS += -DNETPDLDIR='"$(netpdldir)"'
