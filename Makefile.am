@@ -65,3 +65,6 @@ include utilities/automake.mk
 include udatapath/automake.mk
 include include/automake.mk
 include debian/automake.mk
+
+netpdldir = $(datadir)/openflow
+netpdl_DATA = customnetpdl.xml
