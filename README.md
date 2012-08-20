@@ -59,7 +59,8 @@ To build, run the following commands in the `of12softswitch` directory:
     $ ./boot.sh
     $ ./configure
     $ make
-
+    $ sudo make install
+    
 Running
 -------
 
