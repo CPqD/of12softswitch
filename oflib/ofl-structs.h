@@ -166,6 +166,12 @@ struct ofl_table_stats {
                                by the table with OFPIT_WRITE_ACTIONS. */
     uint32_t   apply_actions; /* Bitmap of OFPAT_* that are supported
                                 by the table with OFPIT_APPLY_ACTIONS. */
+	uint64_t write_setfields;/* Bitmap of (1 << OFPXMT_*) header fields that
+                                can be set with OFPIT_WRITE_ACTIONS. */
+	uint64_t apply_setfields;/* Bitmap of (1 << OFPXMT_*) header fields that
+                                uint64_t metadata_match;*/ 
+    uint64_t metadata_match; /* Bits of metadata table can match. */
+	uint64_t metadata_write; /* Bits of metadata table can write. */
     uint32_t   config;        /* Bitmap of OFPTC_* values */
     uint32_t   max_entries;   /* Max number of entries supported. */
     uint32_t   active_count;  /* Number of active entries. */

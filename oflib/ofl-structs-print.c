@@ -640,11 +640,13 @@ ofl_structs_table_stats_print(FILE *stream, struct ofl_table_stats *s) {
     ofl_table_print(stream, s->table_id);
     fprintf(stream, "\", name=\"%s\", wcards=\"0x%"PRIx32"\", match=\"0x%"PRIx32"\", "
                           "insts=\"0x%"PRIx32"\", w_acts=\"0x%"PRIx32"\", a_acts=\"0x%"PRIx32"\", "
-                          "conf=\"0x%"PRIx32"\", max=\"%u\", active=\"%u\", "
+                          "a_set=\"0x%"PRIx64"\", w_set=\"0x%"PRIx64"\", m_match=\"0x%"PRIx64"\", "
+                          "m_write=\"0x%"PRIx64"\", conf=\"0x%"PRIx32"\", max=\"%u\", active=\"%u\", "
                           "lookup=\"%"PRIu64"\", match=\"%"PRIu64"\"",
                   s->name, s->wildcards, s->match,
                   s->instructions, s->write_actions, s->apply_actions,
-                  s->config, s->max_entries, s->active_count,
+                  s->write_setfields, s->apply_setfields, s->metadata_match,
+                  s->metadata_write,s->config, s->max_entries, s->active_count,
                   s->lookup_count, s->matched_count);
 }
 

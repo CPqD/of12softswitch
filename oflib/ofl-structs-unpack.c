@@ -581,6 +581,10 @@ ofl_structs_table_stats_unpack(struct ofp_table_stats *src, size_t *len, struct 
     p->instructions =  ntohl(src->instructions);
     p->write_actions = ntohl(src->write_actions);
     p->apply_actions = ntohl(src->apply_actions);
+    p->write_setfields = ntoh64(src->write_setfields);
+    p->apply_setfields = ntoh64(src->apply_setfields);
+    p->metadata_match =  ntoh64(src->metadata_match);
+    p->metadata_write =  ntoh64(src->metadata_write);
     p->config =        ntohl(src->config);
     p->max_entries =   ntohl(src->max_entries);
     p->active_count =  ntohl(src->active_count);

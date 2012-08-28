@@ -242,6 +242,10 @@ flow_table_create(struct datapath *dp, uint8_t table_id) {
     table->stats->instructions  = DP_SUPPORTED_INSTRUCTIONS;
     table->stats->write_actions = DP_SUPPORTED_ACTIONS;
     table->stats->apply_actions = DP_SUPPORTED_ACTIONS;
+    table->stats->write_setfields = DP_SUPPORTED_MATCH_FIELDS;
+    table->stats->apply_setfields = DP_SUPPORTED_MATCH_FIELDS;
+    table->stats->metadata_match = 0xffffffffffffffff;
+    table->stats->metadata_write = 0xffffffffffffffff;
     table->stats->config        = OFPTC_TABLE_MISS_CONTROLLER;
     table->stats->max_entries   = FLOW_TABLE_MAX_ENTRIES;
     table->stats->active_count  = 0;
