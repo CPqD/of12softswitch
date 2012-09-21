@@ -258,17 +258,20 @@ parse_oxm_entry(struct ofl_match *match, const struct oxm_field *f,
         }   
         /* 802.1Q header. */
         case OFI_OXM_OF_VLAN_VID:{
-            if (get_unaligned_u16(value)> 4095)
+	    printf("VLAN ID is  %d\n\n",ntohs(get_unaligned_u16(value)));
+            if (ntohs(get_unaligned_u16(value))> 4095)
                 return ofp_mkerr(OFPET_BAD_MATCH, OFPBMC_BAD_VALUE);
             else 
-                ofl_structs_match_put16(match, f->header, get_unaligned_u16(value));
+                ofl_structs_match_put16(match, f->header, ntohs(get_unaligned_u16(value)));
             return 0;
         }
         case OFI_OXM_OF_VLAN_VID_W:{
-            if (get_unaligned_u16(value)> 4095)
+	    uint16_t *v = (uint16_t*) value;
+            printf("VLAN ID MASKED is  %d\n\n", ntohs(*v));
+	    if (ntohs(get_unaligned_u16(value))> 4095)
                 return ofp_mkerr(OFPET_BAD_MATCH, OFPBMC_BAD_VALUE);
             else 
-                ofl_structs_match_put16m(match, f->header, get_unaligned_u16(value),get_unaligned_u16(mask));
+                ofl_structs_match_put16m(match, f->header, ntohs(get_unaligned_u16(value)),ntohs(get_unaligned_u16(mask)));
             return 0;
         }
        
@@ -624,7 +627,8 @@ oxm_put_eth_dst(struct ofpbuf *b,
 static bool
 is_requisite(uint32_t header){
     if(header == OXM_OF_IN_PORT || header == OXM_OF_ETH_TYPE 
-        || header == OXM_OF_VLAN_VID || header == OXM_OF_IP_PROTO) {
+        || header == OXM_OF_VLAN_VID || header == OXM_OF_VLAN_VID_W ||
+       header == OXM_OF_IP_PROTO) {
         return true;
     }
     return false; 
@@ -664,6 +668,16 @@ int oxm_put_match(struct ofpbuf *buf, struct ofl_match *omt){
          memcpy(&value, oft->value,sizeof(uint16_t));
          oxm_put_16(buf,oft->header, htons(value));
     }
+
+    /* VLAN ID Wildcarded */
+    HMAP_FOR_EACH_WITH_HASH(oft, struct ofl_match_tlv, hmap_node, hash_int(OXM_OF_VLAN_VID_W, 0),
+          &omt->match_fields) {
+         uint16_t value, mask;
+         memcpy(&value, oft->value,sizeof(uint16_t));
+         memcpy(&mask, oft->value + 2,sizeof(uint16_t));	
+         oxm_put_16w(buf,oft->header, htons(value), htons(mask));
+    }
+
     
     /* L3 Pre-requisites */   
      HMAP_FOR_EACH_WITH_HASH(oft, struct ofl_match_tlv, hmap_node, hash_int(OXM_OF_IP_PROTO, 0),
