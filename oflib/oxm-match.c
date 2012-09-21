@@ -258,7 +258,6 @@ parse_oxm_entry(struct ofl_match *match, const struct oxm_field *f,
         }   
         /* 802.1Q header. */
         case OFI_OXM_OF_VLAN_VID:{
-	    printf("VLAN ID is  %d\n\n",ntohs(get_unaligned_u16(value)));
             if (ntohs(get_unaligned_u16(value))> 4095)
                 return ofp_mkerr(OFPET_BAD_MATCH, OFPBMC_BAD_VALUE);
             else 
@@ -267,7 +266,6 @@ parse_oxm_entry(struct ofl_match *match, const struct oxm_field *f,
         }
         case OFI_OXM_OF_VLAN_VID_W:{
 	    uint16_t *v = (uint16_t*) value;
-            printf("VLAN ID MASKED is  %d\n\n", ntohs(*v));
 	    if (ntohs(get_unaligned_u16(value))> 4095)
                 return ofp_mkerr(OFPET_BAD_MATCH, OFPBMC_BAD_VALUE);
             else 
@@ -380,11 +378,11 @@ parse_oxm_entry(struct ofl_match *match, const struct oxm_field *f,
             return 0;
             /* ARP header. */
         case OFI_OXM_OF_ARP_OP:{
-            uint8_t *v = (uint8_t*) value;
-            if (*v > 255)
+            uint16_t *v = (uint16_t*) value;
+            if (ntohs(*v) > 255)
                 return ofp_mkerr(OFPET_BAD_MATCH, OFPBMC_BAD_VALUE);
             else
-                ofl_structs_match_put8(match, f->header, *v);
+                ofl_structs_match_put16(match, f->header, ntohs(*v));
             return 0;
         }
         case OFI_OXM_OF_MPLS_LABEL:
