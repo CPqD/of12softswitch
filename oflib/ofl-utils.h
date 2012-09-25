@@ -118,5 +118,4 @@ ntoh64(uint64_t n) {
 #endif
 }
 
-
 #endif /* OFL_UTILS_H */

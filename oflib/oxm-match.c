@@ -222,7 +222,7 @@ parse_oxm_entry(struct ofl_match *match, const struct oxm_field *f,
     switch (f->index) {
         case OFI_OXM_OF_IN_PORT: {
             uint32_t* in_port = (uint32_t*) value;
-            ofl_structs_match_put32(match, f->header, htonl(*in_port));
+            ofl_structs_match_put32(match, f->header, ntohl(*in_port));
             return 0;
         }
         case OFI_OXM_OF_IN_PHY_PORT:{
@@ -265,7 +265,6 @@ parse_oxm_entry(struct ofl_match *match, const struct oxm_field *f,
             return 0;
         }
         case OFI_OXM_OF_VLAN_VID_W:{
-	    uint16_t *v = (uint16_t*) value;
 	    if (ntohs(get_unaligned_u16(value))> 4095)
                 return ofp_mkerr(OFPET_BAD_MATCH, OFPBMC_BAD_VALUE);
             else 
@@ -315,7 +314,7 @@ parse_oxm_entry(struct ofl_match *match, const struct oxm_field *f,
         case OFI_OXM_OF_IPV4_SRC_W:
         case OFI_OXM_OF_ARP_SPA_W:
         case OFI_OXM_OF_ARP_TPA_W:
-             ofl_structs_match_put32m(match, f->header, ntohl(*((uint32_t*) value)), ntohl(*((uint32_t*) mask)));
+             ofl_structs_match_put32m(match, f->header, *((uint32_t*) value), *((uint32_t*) mask));
              return 0;              
         case OFI_OXM_OF_ARP_SHA:
         case OFI_OXM_OF_ARP_THA:
@@ -672,8 +671,9 @@ int oxm_put_match(struct ofpbuf *buf, struct ofl_match *omt){
           &omt->match_fields) {
          uint16_t value, mask;
          memcpy(&value, oft->value,sizeof(uint16_t));
-         memcpy(&mask, oft->value + 2,sizeof(uint16_t));	
-         oxm_put_16w(buf,oft->header, htons(value), htons(mask));
+         memcpy(&mask, oft->value + 2,sizeof(uint16_t));
+         if(mask)	
+            oxm_put_16w(buf,oft->header, htons(value), htons(mask));
     }
 
     
@@ -707,7 +707,10 @@ int oxm_put_match(struct ofpbuf *buf, struct ofl_match *omt){
                     else {
                         uint8_t mask;
                         memcpy(&mask,oft->value + length ,sizeof(uint8_t));
-                        oxm_put_8w(buf, oft->header,value,mask);
+                        if(mask == 0xff)
+                            oxm_put_8(buf, oft->header,value);
+                        else if (mask != 0x00)
+                            oxm_put_8w(buf, oft->header,value, mask);
                     }
                     break;
                   }
@@ -719,7 +722,11 @@ int oxm_put_match(struct ofpbuf *buf, struct ofl_match *omt){
                     else {
                         uint16_t mask;
                         memcpy(&mask,oft->value + length ,sizeof(uint16_t));
-                        oxm_put_16w(buf, oft->header,htons(value),htons(mask));
+                        if (mask == 0xffff){
+                            oxm_put_16(buf, oft->header,htons(value));
+                        }
+                        else if(mask != 0x0000)
+                            oxm_put_16w(buf, oft->header,htons(value),htons(mask));
                     }   
                     break;     
                 }    
@@ -736,10 +743,22 @@ int oxm_put_match(struct ofpbuf *buf, struct ofl_match *omt){
                          uint32_t mask;
                          memcpy(&mask,oft->value + length ,sizeof(uint32_t));
 						 if (oft->header == OXM_OF_IPV4_DST || oft->header == OXM_OF_IPV4_SRC
-							||oft->header == OXM_OF_ARP_SPA || oft->header == OXM_OF_ARP_TPA)
-                            oxm_put_32w(buf, oft->header, value, mask); 
-						 else
-							oxm_put_32w(buf, oft->header,htonl(value),htonl(mask));
+							||oft->header == OXM_OF_ARP_SPA || oft->header == OXM_OF_ARP_TPA){
+                            if (mask == 0xffffffff){
+                                oxm_put_32(buf,oft->header, value);
+                            } 
+                            else if(mask != 0x00000000){
+                                oxm_put_32w(buf, oft->header, value, mask); 
+                            }
+                         }
+						 else{
+						    if (mask == 0xffffffff){
+						        oxm_put_32(buf,oft->header, htonl(value));
+						    }
+						    else if(mask == 0x00000000){
+							    oxm_put_32w(buf, oft->header,htonl(value),htonl(mask));
+							}
+						 }
                     } 
                       break;     
                             
@@ -752,19 +771,31 @@ int oxm_put_match(struct ofpbuf *buf, struct ofl_match *omt){
                      else {
                          uint64_t mask;
                          memcpy(&mask,oft->value + length ,sizeof(uint64_t));
-                         oxm_put_64w(buf, oft->header,hton64(value),hton64(mask));
+                         if(mask == 0xffffffffffffffff){
+                            oxm_put_64(buf,oft->header, hton64(value));
+                         }
+                         else if(mask!= 0x0000000000000000){
+                            oxm_put_64w(buf, oft->header,hton64(value),hton64(mask));
+                         }
                      }
                      break;      
                 }                 
                 case (ETH_ADDR_LEN):{ 
                      uint8_t value[ETH_ADDR_LEN];
                      memcpy(&value, oft->value,ETH_ADDR_LEN);
-                     if(!has_mask) 
+                     if(!has_mask){
                          oxm_put_eth(buf,oft->header, value);
+                     }
                      else {
                          uint8_t mask[ETH_ADDR_LEN];
+                         uint8_t all_mask[ETH_ADDR_LEN] = {0xff,0xff,0xff,0xff,0xff,0xff};
                          memcpy(&mask,oft->value + length ,ETH_ADDR_LEN);
-                         oxm_put_ethm(buf, oft->header,value,mask);
+                         if (!memcmp(mask,all_mask, ETH_ADDR_LEN)){
+                            oxm_put_eth(buf,oft->header, value);
+                         }
+                         else if(check_all_zero_array(mask,ETH_ADDR_LEN)){
+                            oxm_put_ethm(buf, oft->header,value,mask);
+                        }
                       }  
                       break;    
                    }
@@ -775,8 +806,15 @@ int oxm_put_match(struct ofpbuf *buf, struct ofl_match *omt){
                          oxm_put_ipv6(buf,oft->header, value);
                      else {
                          uint8_t mask[IPv6_ADDR_LEN];
+                         uint8_t all_mask[IPv6_ADDR_LEN] = {0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+                                                           0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff};
                          memcpy(&mask,oft->value + length ,IPv6_ADDR_LEN);
-                         oxm_put_ipv6m(buf, oft->header,value,mask);
+                         if (!memcmp(mask,all_mask, IPv6_ADDR_LEN)){
+                            oxm_put_ipv6(buf,oft->header, value);
+                         }
+                         else if(check_all_zero_array(mask,IPv6_ADDR_LEN)){
+                            oxm_put_ipv6m(buf, oft->header,value,mask);
+                         }
                       }  
                       break;    
                    }

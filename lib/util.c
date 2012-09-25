@@ -295,3 +295,14 @@ str_to_ullong(const char *s, int base, unsigned long long *ull)
 {
     return str_to_llong(s, base, (long long *) ull);
 }
+
+bool
+check_all_zero_array(uint8_t array[], uint8_t size){
+    
+    int i;
+    int sum = 0;
+    for (i = 0; i < size; ++i) {
+      sum |= array[i];
+    }
+    return sum;
+}

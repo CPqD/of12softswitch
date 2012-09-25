@@ -121,6 +121,8 @@ bool str_to_uint(const char *, int base, unsigned int *);
 bool str_to_ulong(const char *, int base, unsigned long *);
 bool str_to_ullong(const char *, int base, unsigned long long *);
 
+bool check_all_zero_array(uint8_t array[], uint8_t size);
+
 #ifdef  __cplusplus
 }
 #endif

@@ -59,12 +59,22 @@ ofl_structs_match_put8m(struct ofl_match *match, uint32_t header, uint8_t value,
     struct ofl_match_tlv *m = malloc(sizeof (struct ofl_match_tlv));
     int len = sizeof(uint8_t);
     
+    if(mask == 0x00)
+        return;
+        
     m->header = header;
-    m->value = malloc(len*2);
+    m->value = malloc(len);
     memcpy(m->value, &value, len);
-    memcpy(m->value + len, &mask, len);
+    match->header.length += 4 + len ;    
+    if(mask != 0xff){
+        m->value = realloc(m->value, len);
+        memcpy((uint16_t*) (m->value + len), &mask, len);
+        match->header.length += len ; 
+    }
+    else {
+         m->header = OXM_HEADER(OXM_VENDOR(header), OXM_FIELD(header), OXM_LENGTH(header)/2);
+    }
     hmap_insert(&match->match_fields,&m->hmap_node,hash_int(header, 0));
-    match->header.length += len*2 + 4;
 }
 
 void
@@ -85,12 +95,23 @@ ofl_structs_match_put16m(struct ofl_match *match, uint32_t header, uint16_t valu
     struct ofl_match_tlv *m = malloc(sizeof (struct ofl_match_tlv));
     int len = sizeof(uint16_t);
     
+    if(mask == 0x0000)
+        return;
+        
     m->header = header;
-    m->value = malloc(len*2);
+    m->value = malloc(len);
     memcpy(m->value, &value, len);
-    memcpy(m->value + len, &mask, len);
+    match->header.length += 4 + len ;    
+    if(mask != 0xfff){
+        m->value = realloc(m->value, len);
+        memcpy((uint16_t*) (m->value + len), &mask, len);
+        match->header.length += len ; 
+    }
+    else {
+         m->header = OXM_HEADER(OXM_VENDOR(header), OXM_FIELD(header), OXM_LENGTH(header)/2);
+    }
     hmap_insert(&match->match_fields,&m->hmap_node,hash_int(header, 0));
-    match->header.length += len*2 + 4;
+
 }
 
 void
@@ -112,13 +133,22 @@ ofl_structs_match_put32m(struct ofl_match *match, uint32_t header, uint32_t valu
     struct ofl_match_tlv *m = malloc(sizeof (struct ofl_match_tlv));
     int len = sizeof(uint32_t);
     
+    if(mask == 0x00000000)
+        return;
+    
     m->header = header;
-    m->value = malloc(len*2);
+    m->value = malloc(len);
     memcpy(m->value, &value, len);
-    memcpy(m->value + len, &mask, len);
+    match->header.length += 4 + len ;    
+    if(mask != 0xffffffff){
+        m->value = realloc(m->value, len);
+        memcpy((uint32_t*) (m->value + len), &mask, len);
+        match->header.length += len ; 
+    }
+    else {
+         m->header = OXM_HEADER(OXM_VENDOR(header), OXM_FIELD(header), OXM_LENGTH(header)/2);
+    }
     hmap_insert(&match->match_fields,&m->hmap_node,hash_int(header, 0));
-    match->header.length += len*2 + 4;
-
 }
 
 void
@@ -164,15 +194,27 @@ ofl_structs_match_put_eth(struct ofl_match *match, uint32_t header, uint8_t valu
 void
 ofl_structs_match_put_eth_m(struct ofl_match *match, uint32_t header, uint8_t value[ETH_ADDR_LEN], uint8_t mask[ETH_ADDR_LEN]){
     struct ofl_match_tlv *m = malloc(sizeof (struct ofl_match_tlv));
+    uint8_t * ptr;
+    uint8_t all_mask[ETH_ADDR_LEN] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
     int len = ETH_ADDR_LEN;
     
-    m->header = header;
-    m->value = malloc(len*2);
+    
+    if (!check_all_zero_array(mask, ETH_ADDR_LEN)){
+        return;    
+    }
+    m->header = header;    
+    m->value = malloc(len);
     memcpy(m->value, value, len);
-    memcpy(m->value + len, mask, len);
+    match->header.length += 4 + len;
+    if(memcmp(all_mask, mask, ETH_ADDR_LEN)){
+        ptr = (uint8_t*)  realloc(m->value, len);
+        memcpy(ptr + len, mask, len);
+        match->header.length += len;
+    }
+    else {
+        m->header = OXM_HEADER(OXM_VENDOR(header), OXM_FIELD(header), OXM_LENGTH(header)/2);
+    }
     hmap_insert(&match->match_fields,&m->hmap_node,hash_int(header, 0));
-    match->header.length += len*2 + 4;
-
 }
 
 void 
@@ -191,15 +233,28 @@ ofl_structs_match_put_ipv6(struct ofl_match *match, uint32_t header, uint8_t val
 
 void 
 ofl_structs_match_put_ipv6m(struct ofl_match *match, uint32_t header, uint8_t value[IPv6_ADDR_LEN], uint8_t mask[IPv6_ADDR_LEN]){
+    uint8_t *ptr;
+    uint8_t all_mask[IPv6_ADDR_LEN] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 
+                                      0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
     struct ofl_match_tlv *m = malloc(sizeof (struct ofl_match_tlv));
     int len = IPv6_ADDR_LEN;
     
-    m->header = header;
-    m->value = malloc(len*2);
+    if (!check_all_zero_array(mask, IPv6_ADDR_LEN)){
+        return;    
+    }
+    m->header = header;    
+    m->value = malloc(len);
     memcpy(m->value, value, len);
-    memcpy(m->value + len, mask, len);
+    match->header.length += 4 + len;
+    if(memcmp(all_mask, mask, ETH_ADDR_LEN)){
+        ptr = (uint8_t*)  realloc(m->value, len);
+        memcpy(ptr + len, mask, len);
+        match->header.length += len;
+    }
+    else {
+        m->header = OXM_HEADER(OXM_VENDOR(header), OXM_FIELD(header), OXM_LENGTH(header)/2);
+    }
     hmap_insert(&match->match_fields,&m->hmap_node,hash_int(header, 0));
-    match->header.length += len*2 + 4;
 
 }
 
