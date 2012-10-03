@@ -431,13 +431,13 @@ execute_entry(struct pipeline *pl, struct flow_entry *entry,
                 struct  packet_fields *f;
                 /* NOTE: Hackish solution. If packet had multiple handles, metadata
                  *       should be updated in all. */
-                 
                 packet_handle_std_validate(pkt->handle_std);
                 
                 /* Search field on the description of the packet. */
                 HMAP_FOR_EACH_WITH_HASH(f,struct packet_fields, hmap_node, hash_int(OXM_OF_METADATA,0), &pkt->handle_std->match.match_fields){
                     uint64_t *metadata = (uint64_t*) f->value; 
-                    memset(f->value,(*metadata & ~wi->metadata_mask) | (wi->metadata & wi->metadata_mask), sizeof(uint64_t));     
+                    *metadata = (*metadata & ~wi->metadata_mask) | (wi->metadata & wi->metadata_mask);
+                    memcpy(f->value, metadata, sizeof(uint64_t));     
                 }
                 break;
             }

@@ -1264,7 +1264,7 @@ parse_match(char *str, struct ofl_match_header **match) {
         /* Metadata */
         if (strncmp(token, MATCH_METADATA KEY_VAL, strlen(MATCH_METADATA KEY_VAL)) == 0) {
             uint64_t metadata;
-            if (sscanf(token, MATCH_METADATA KEY_VAL "0x%"SCNx64"", (&metadata))) {
+            if (sscanf(token, MATCH_METADATA KEY_VAL "0x%"SCNx64"", &(metadata)) != 1) {
                 ofp_fatal(0, "Error parsing %s: %s.", MATCH_METADATA, token);
             }
             else ofl_structs_match_put64(m, OXM_OF_METADATA, metadata);

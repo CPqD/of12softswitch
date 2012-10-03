@@ -168,13 +168,23 @@ void
 ofl_structs_match_put64m(struct ofl_match *match, uint32_t header, uint64_t value, uint64_t mask){
     struct ofl_match_tlv *m = malloc(sizeof (struct ofl_match_tlv));
     int len = sizeof(uint64_t);
+   
+    if(mask == 0x0000000000000000)
+        return;
     
     m->header = header;
-    m->value = malloc(len*2);
+    m->value = malloc(len);
     memcpy(m->value, &value, len);
-    memcpy(m->value + len, &mask, len);
+    match->header.length += 4 + len ;    
+    if(mask != 0xffffffffffffffff){
+        m->value = realloc(m->value, len);
+        memcpy((uint32_t*) (m->value + len), &mask, len);
+        match->header.length += len ; 
+    }
+    else {
+         m->header = OXM_HEADER(OXM_VENDOR(header), OXM_FIELD(header), OXM_LENGTH(header)/2);
+    }
     hmap_insert(&match->match_fields,&m->hmap_node,hash_int(header, 0));
-    match->header.length += len*2 + 4;
 
 }
 

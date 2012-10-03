@@ -233,11 +233,14 @@ parse_oxm_entry(struct ofl_match *match, const struct oxm_field *f,
             
         }
         case OFI_OXM_OF_METADATA:{
-            ofl_structs_match_put64(match, f->header, get_unaligned_u64(value));
+            uint64_t* metadata = (uint64_t*) value;
+            ofl_structs_match_put64(match, f->header, ntoh64(*metadata));
             return 0;
         }
         case OFI_OXM_OF_METADATA_W:{
-            ofl_structs_match_put64m(match, f->header, get_unaligned_u64(value),get_unaligned_u64(mask));
+            uint64_t* metadata = (uint64_t*) value;
+            uint64_t* meta_mask =  (uint64_t*) mask;
+            ofl_structs_match_put64m(match, f->header, ntoh64(*metadata),ntoh64(*meta_mask));
             return 0;
         }
         /* Ethernet header. */
@@ -258,17 +261,20 @@ parse_oxm_entry(struct ofl_match *match, const struct oxm_field *f,
         }   
         /* 802.1Q header. */
         case OFI_OXM_OF_VLAN_VID:{
-            if (ntohs(get_unaligned_u16(value))> 4095)
+            uint16_t * vlan_vid = (uint16_t*) value;
+            if (ntohs(*vlan_vid)> 4095)
                 return ofp_mkerr(OFPET_BAD_MATCH, OFPBMC_BAD_VALUE);
             else 
-                ofl_structs_match_put16(match, f->header, ntohs(get_unaligned_u16(value)));
+                ofl_structs_match_put16(match, f->header, ntohs(*vlan_vid));
             return 0;
         }
         case OFI_OXM_OF_VLAN_VID_W:{
-	    if (ntohs(get_unaligned_u16(value))> 4095)
+	        uint16_t* vlan_vid = (uint16_t*) value;
+	        uint16_t* vlan_mask = (uint16_t*) mask;
+            if (ntohs(*vlan_vid)> 4095)
                 return ofp_mkerr(OFPET_BAD_MATCH, OFPBMC_BAD_VALUE);
             else 
-                ofl_structs_match_put16m(match, f->header, ntohs(get_unaligned_u16(value)),ntohs(get_unaligned_u16(mask)));
+                ofl_structs_match_put16m(match, f->header, ntohs(*vlan_vid),ntohs(*vlan_mask));
             return 0;
         }
        

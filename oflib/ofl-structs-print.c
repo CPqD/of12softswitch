@@ -407,10 +407,10 @@ print_oxm_tlv(FILE *stream, struct ofl_match_tlv *f, size_t *size){
                                 fprintf(stream, ", ");
                 } 
                 else if (f->header == OXM_OF_METADATA || f->header == OXM_OF_METADATA_W){
-                            fprintf(stream, "metadata= %lld", (uint64_t) *f->value);
+                            fprintf(stream, "meta=\"0x%"PRIx64"\"", *((uint64_t*) f->value));
                             *size -= 12;
                             if (OXM_HASMASK(f->header)){
-                                fprintf(stream, "metadata_mask= %lld", (uint64_t) *(f->value + 8));
+                                fprintf(stream, "meta_mask=\"0x%"PRIx64"\"", (uint64_t) *(f->value + 8));
                                 *size -= 8;
                             }                            
                             if (*size > 4)                                
@@ -585,7 +585,7 @@ ofl_structs_flow_stats_print(FILE *stream, struct ofl_flow_stats *s, struct ofl_
 
 char *
 ofl_structs_bucket_counter_to_string(struct ofl_bucket_counter *s) {
-        char *str;
+    char *str;
     size_t str_size;
     FILE *stream = open_memstream(&str, &str_size);
     ofl_structs_bucket_counter_print(stream, s);
@@ -601,7 +601,7 @@ ofl_structs_bucket_counter_print(FILE *stream, struct ofl_bucket_counter *c) {
 
 char *
 ofl_structs_group_stats_to_string(struct ofl_group_stats *s) {
-        char *str;
+    char *str;
     size_t str_size;
     FILE *stream = open_memstream(&str, &str_size);
     ofl_structs_group_stats_print(stream, s);
@@ -656,7 +656,7 @@ ofl_structs_table_stats_print(FILE *stream, struct ofl_table_stats *s) {
 
 char *
 ofl_structs_port_stats_to_string(struct ofl_port_stats *s) {
-        char *str;
+    char *str;
     size_t str_size;
     FILE *stream = open_memstream(&str, &str_size);
     ofl_structs_port_stats_print(stream, s);

@@ -157,6 +157,7 @@ int nbee_extract_proto_fields(struct ofpbuf * pktin, _nbPDMLField * field, struc
 
 extern "C" int nblink_packet_parse(struct ofpbuf * pktin,  struct hmap * pktout, struct protocols_std * pkt_proto)
 {
+    struct  packet_fields *f;
     protocol_reset(pkt_proto);
 	pkhdr->caplen = pktin->size; //need this information
 	pkhdr->len = pktin->size; //need this information
@@ -306,6 +307,21 @@ extern "C" int nblink_packet_parse(struct ofpbuf * pktin,  struct hmap * pktout,
         {
             field = field->NextField;
         }
+	}
+	/* Checks if metadata field exists */
+	HMAP_FOR_EACH_WITH_HASH(f, struct packet_fields, hmap_node, hash_int(OXM_OF_METADATA,0), pktout){ 
+	}
+	
+	if(f == NULL){
+	/*Add default metadata field*/
+	    struct packet_fields *pktout_metadata;
+	    uint64_t metadata;
+	    pktout_metadata = (struct packet_fields*) malloc(sizeof(struct packet_fields));
+        pktout_metadata->header = OXM_OF_METADATA;
+        pktout_metadata->value = (uint8_t*) malloc(sizeof(uint64_t) );
+        metadata = 0xffffffffffffffff;
+        memcpy(pktout_metadata->value, &metadata, sizeof(uint64_t));
+        hmap_insert_fast(pktout, &pktout_metadata->hmap_node,hash_int(pktout_metadata->header, 0));  
 	}
 	return 1;
 }
