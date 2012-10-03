@@ -1173,6 +1173,7 @@ parse_match(char *str, struct ofl_match_header **match) {
                 ofp_fatal(0, "Error parsing mpls_label: %s.", token);
             }
             else ofl_structs_match_put32(m,OXM_OF_MPLS_LABEL,mpls_label);
+            continue;
         }
         if (strncmp(token, MATCH_MPLS_TC KEY_VAL, strlen(MATCH_MPLS_TC KEY_VAL)) == 0) {
             uint8_t mpls_tc;
