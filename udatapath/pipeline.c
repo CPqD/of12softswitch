@@ -429,17 +429,30 @@ execute_entry(struct pipeline *pl, struct flow_entry *entry,
             case OFPIT_WRITE_METADATA: {
                 struct ofl_instruction_write_metadata *wi = (struct ofl_instruction_write_metadata *)inst;
                 struct  packet_fields *f;
+                
                 /* NOTE: Hackish solution. If packet had multiple handles, metadata
                  *       should be updated in all. */
                 packet_handle_std_validate(pkt->handle_std);
                 
-                /* Search field on the description of the packet. */
-                HMAP_FOR_EACH_WITH_HASH(f,struct packet_fields, hmap_node, hash_int(OXM_OF_METADATA,0), &pkt->handle_std->match.match_fields){
+                /* Checks if there is a metadata field on the packet. */
+                HMAP_FOR_EACH_WITH_HASH(f, struct packet_fields, hmap_node, hash_int(OXM_OF_METADATA,0), &pkt->handle_std->match.match_fields){
                     uint64_t *metadata = (uint64_t*) f->value; 
                     *metadata = (*metadata & ~wi->metadata_mask) | (wi->metadata & wi->metadata_mask);
                     memcpy(f->value, metadata, sizeof(uint64_t));     
                 }
                 break;
+                
+                /*Add metadata to the packet */
+                if(f == NULL){
+                    struct packet_fields *pktout_metadata;
+	                uint64_t metadata;
+	                pktout_metadata = (struct packet_fields*) malloc(sizeof(struct packet_fields));
+                    pktout_metadata->header = OXM_OF_METADATA;
+                    pktout_metadata->value = (uint8_t*) malloc(sizeof(uint64_t) );
+                    metadata =  wi->metadata & wi->metadata_mask;
+                    memcpy(pktout_metadata->value, &metadata, sizeof(uint64_t));
+                    hmap_insert_fast(&pkt->handle_std->match.match_fields, &pktout_metadata->hmap_node, hash_int(pktout_metadata->header, 0)); 
+                }
             }
             case OFPIT_WRITE_ACTIONS: {
                 struct ofl_instruction_actions *wa = (struct ofl_instruction_actions *)inst;
