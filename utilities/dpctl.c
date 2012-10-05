@@ -1093,7 +1093,7 @@ parse_match(char *str, struct ofl_match_header **match) {
         }
         
         /* ICMP */
-        if (strncmp(token, MATCH_ICMPV4_CODE, strlen(MATCH_ICMPV4_CODE KEY_VAL)) == 0) {
+        if (strncmp(token, MATCH_ICMPV4_CODE KEY_VAL, strlen(MATCH_ICMPV4_CODE KEY_VAL)) == 0) {
             uint8_t icmpv4_code;
             if (parse8(token + strlen(MATCH_ICMPV4_CODE KEY_VAL), NULL, 0, 0x3f, &icmpv4_code)) {
                 ofp_fatal(0, "Error parsing icmpv4_code: %s.", token);
@@ -1102,16 +1102,15 @@ parse_match(char *str, struct ofl_match_header **match) {
                  ofl_structs_match_put8(m, OXM_OF_ICMPV4_CODE, icmpv4_code);
             continue;
         }   
-        if (strncmp(token, MATCH_ICMPV4_TYPE, strlen(MATCH_ICMPV4_TYPE KEY_VAL)) == 0) {
+        if (strncmp(token, MATCH_ICMPV4_TYPE KEY_VAL, strlen(MATCH_ICMPV4_TYPE KEY_VAL)) == 0) {
             uint8_t icmpv4_type;
             if (parse8(token + strlen(MATCH_ICMPV4_TYPE KEY_VAL), NULL, 0, 0x3f, &icmpv4_type)) {
                 ofp_fatal(0, "Error parsing icmpv4_type: %s.", token);
             }
             else 
-                 ofl_structs_match_put8(m, OXM_OF_ICMPV4_CODE, icmpv4_type);
+                 ofl_structs_match_put8(m, OXM_OF_ICMPV4_TYPE, icmpv4_type);
             continue;
         }   
-        
         /* TCP */
         if (strncmp(token, MATCH_TP_SRC KEY_VAL, strlen(MATCH_TP_SRC KEY_VAL)) == 0) {
             uint16_t tp_src;
@@ -1930,10 +1929,11 @@ parse8(char *str, struct names8 *names, size_t names_num, uint8_t max, uint8_t *
             return 0;
         }
     }
-
+    
     if ((max > 0) && (sscanf(str, "%"SCNu8"", val)) == 1 && (*val <= max)) {
         return 0;
     }
+
     return -1;
 }
 
