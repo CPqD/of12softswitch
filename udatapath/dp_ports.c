@@ -521,10 +521,9 @@ dp_ports_lookup(struct datapath *dp, uint32_t port_no) {
         return dp->local_port;
     }
 
-    if (port_no < 1 || port_no > DP_MAX_PORTS) {
+    if (port_no < 1 || port_no > dp->ports_num -1) {
         return NULL;
     }
-
     return &dp->ports[port_no];
 }
 
