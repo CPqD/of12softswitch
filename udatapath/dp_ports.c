@@ -852,10 +852,11 @@ new_queue(struct sw_port * port, struct sw_queue * queue,
 
     queue->props = xmalloc(sizeof(struct ofl_packet_queue));
     queue->props->properties = xmalloc(sizeof(struct ofl_queue_prop_header *));
+    queue->props->queue_id = queue_id;    
     queue->props->properties_num = 1;
     queue->props->properties[0] = xmalloc(sizeof(struct ofl_queue_prop_min_rate));
     ((struct ofl_queue_prop_min_rate *)(queue->props->properties[0]))->header.type = OFPQT_MIN_RATE;
-    ((struct ofl_queue_prop_min_rate *)(queue->props->properties[0]))->rate = ntohs(mr->rate);
+    ((struct ofl_queue_prop_min_rate *)(queue->props->properties[0]))->rate = mr->rate;
 
     port->num_queues++;
     return 0;

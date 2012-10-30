@@ -681,7 +681,7 @@ queue_get_config(struct vconn *vconn, int argc UNUSED, char *argv[]) {
         ofp_fatal(0, "Error parsing queue_get_config port: %s.", argv[0]);
     }
 
-    dpctl_send_and_print(vconn, (struct ofl_msg_header *)&msg);
+    dpctl_transact_and_print(vconn, (struct ofl_msg_header *)&msg, NULL);
 }
 
 
