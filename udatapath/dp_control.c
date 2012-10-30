@@ -216,6 +216,9 @@ handle_control_stats_request(struct datapath *dp,
         case (OFPST_GROUP_DESC): {
             return group_table_handle_stats_request_group_desc(dp->groups, msg, sender);
         }
+		case (OFPST_GROUP_FEATURES):{
+            //return group_table_handle_stats_request_group_features(dp->groups, msg, sender);			
+		}
         case (OFPST_EXPERIMENTER): {
             return dp_exp_stats(dp, (struct ofl_msg_stats_request_experimenter *)msg, sender);
         }

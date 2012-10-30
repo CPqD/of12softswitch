@@ -34,6 +34,7 @@
 #include "group_table.h"
 #include "datapath.h"
 #include "dp_actions.h"
+#include "dp_capabilities.h"
 #include "hmap.h"
 #include "list.h"
 #include "packet.h"
@@ -283,6 +284,30 @@ group_table_handle_stats_request_group_desc(struct group_table *table,
     return 0;
 }
 
+ofl_err
+group_table_handle_stats_request_group_features(struct group_table *table,
+                                  struct ofl_msg_stats_request_header *msg UNUSED,
+                                  const struct sender *sender) {
+    size_t i = 0;
+
+    struct ofl_msg_stats_reply_group_features reply =
+            {{{.type = OFPT_STATS_REPLY},
+              .type = OFPST_GROUP_FEATURES, .flags = 0x0000},
+             .types = table->features->types,
+			 .capabilities = table->features->capabilities
+            };
+
+	for(i = 0; i < 4; i++){
+		reply.max_groups[i] = table->features->max_groups[i];
+		reply.actions[i] = table->features->actions[i];
+	}
+
+    dp_send_message(table->dp, (struct ofl_msg_header *)&reply, sender);
+
+    ofl_msg_free((struct ofl_msg_header *)msg, table->dp->exp);
+    return 0;
+}
+
 void
 group_table_execute(struct group_table *table, struct packet *packet, uint32_t group_id) {
     struct group_entry *entry;
@@ -300,10 +325,18 @@ group_table_execute(struct group_table *table, struct packet *packet, uint32_t g
 struct group_table *
 group_table_create(struct datapath *dp) {
     struct group_table *table;
+	size_t i;
 
     table = xmalloc(sizeof(struct group_table));
     table->dp = dp;
-    table->entries_num = 0;
+	table->features = (struct ofl_msg_stats_reply_group_features*) xmalloc(sizeof(struct ofl_msg_stats_reply_group_features));	
+	table->features->types = DP_SUPPORTED_GROUPS;
+	table->features->capabilities = DP_SUPPORTED_GROUP_CAPABILITIES;    
+	for(i = 0; i < 4; i++){
+		table->features->max_groups[i] = OFPG_MAX;
+		table->features->actions[i] = DP_SUPPORTED_ACTIONS;
+	}	
+	table->entries_num = 0;
     hmap_init(&table->entries);
     table->buckets_num = 0;
 

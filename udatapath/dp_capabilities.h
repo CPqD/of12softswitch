@@ -108,5 +108,15 @@
                                   | OFPXMT_OFB_MPLS_LABEL     \
                                   | OFPXMT_OFB_MPLS_TC         )
 
+#define DP_SUPPORTED_GROUPS ( OFPGT_ALL      \
+							| OFPGT_SELECT   \
+							| OFPGT_INDIRECT \
+							| OFPGT_FF)
+
+#define DP_SUPPORTED_GROUP_CAPABILITIES ( OFPGFC_SELECT_WEIGHT      \
+							            /*| OFPGFC_SELECT_LIVENESS    \
+							            | OFPGFC_CHAINING           \
+							            | OFPGFC_CHAINING_CHECKS*/)
+
 
 #endif /* DP_CAPABILITIES_H */
