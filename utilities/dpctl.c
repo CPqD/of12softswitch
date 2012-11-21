@@ -152,10 +152,10 @@ static int
 parse_table(char *str, uint8_t *table);
 
 static int
-parse_dl_addr(char *str, uint8_t *addr);
+parse_dl_addr(char *str, uint8_t *addr, uint8_t **mask);
 
 static int
-parse_nw_addr(char *str, uint32_t *addr);
+parse_nw_addr(char *str, uint32_t *addr, uint32_t **mask);
 
 static int
 parse_vlan_vid(char *str, uint16_t *vid);
@@ -978,36 +978,59 @@ parse_match(char *str, struct ofl_match_header **match) {
         /* Ethernet Address*/
         if (strncmp(token, MATCH_DL_SRC KEY_VAL, strlen(MATCH_DL_SRC KEY_VAL)) == 0) {
             uint8_t eth_src[6];
-            if (parse_dl_addr(token + strlen(MATCH_DL_SRC KEY_VAL), eth_src)) {
+            uint8_t *mask;
+            if (parse_dl_addr(token + strlen(MATCH_DL_SRC KEY_VAL), eth_src, &mask)) {
                 ofp_fatal(0, "Error parsing dl_src: %s.", token);
             }
-            else ofl_structs_match_put_eth(m,OXM_OF_ETH_SRC,eth_src);
+            else { 
+                if (mask == NULL)
+                    ofl_structs_match_put_eth(m,OXM_OF_ETH_SRC,eth_src);
+                else 
+                    ofl_structs_match_put_eth_m(m,OXM_OF_ETH_SRC_W,eth_src,mask);
+            }
             continue;
         }
         if (strncmp(token, MATCH_DL_DST KEY_VAL, strlen(MATCH_DL_DST KEY_VAL)) == 0) {
             uint8_t eth_dst[6];
-            if (parse_dl_addr(token + strlen(MATCH_DL_DST KEY_VAL), eth_dst)) {
+            uint8_t *mask;
+            if (parse_dl_addr(token + strlen(MATCH_DL_DST KEY_VAL), eth_dst, &mask)) {
                 ofp_fatal(0, "Error parsing dl_dst: %s.", token);
             }
-            else ofl_structs_match_put_eth(m,OXM_OF_ETH_DST,eth_dst);
+            else {
+                 if (mask == NULL)
+                    ofl_structs_match_put_eth(m,OXM_OF_ETH_DST,eth_dst);
+                 else 
+                    ofl_structs_match_put_eth_m(m,OXM_OF_ETH_DST_W,eth_dst, mask); 
+            }     
             continue;
-        }
-        
+        }   
         /* ARP */
         if (strncmp(token, MATCH_ARP_SHA KEY_VAL, strlen(MATCH_ARP_SHA KEY_VAL)) == 0) {
             uint8_t arp_sha[6];
-            if (parse_dl_addr(token + strlen(MATCH_DL_SRC KEY_VAL), arp_sha)) {
+            uint8_t *mask;
+            if (parse_dl_addr(token + strlen(MATCH_DL_SRC KEY_VAL), arp_sha, &mask)) {
                 ofp_fatal(0, "Error parsing arp_sha: %s.", token);
             }
-            else ofl_structs_match_put_eth(m, OXM_OF_ARP_SHA, arp_sha);
+            else { 
+                if (mask == NULL)
+                    ofl_structs_match_put_eth(m, OXM_OF_ARP_SHA, arp_sha);
+                else
+                    ofl_structs_match_put_eth_m(m, OXM_OF_ARP_SHA_W, arp_sha, mask);
+            }
             continue;
         }
         if (strncmp(token, MATCH_ARP_THA KEY_VAL, strlen(MATCH_ARP_THA KEY_VAL)) == 0) {
             uint8_t arp_tha[6];
-            if (parse_dl_addr(token + strlen(MATCH_ARP_THA KEY_VAL), arp_tha)) {
+            uint8_t *mask;
+            if (parse_dl_addr(token + strlen(MATCH_ARP_THA KEY_VAL), arp_tha, &mask)) {
                 ofp_fatal(0, "Error parsing arp_tha %s.", token);
             }
-            else ofl_structs_match_put_eth(m,OXM_OF_ARP_THA, arp_tha);
+            else {
+                if (mask == NULL)
+                    ofl_structs_match_put_eth(m,OXM_OF_ARP_THA, arp_tha);
+                else 
+                    ofl_structs_match_put_eth_m(m,OXM_OF_ARP_THA_W, arp_tha, mask); 
+            }
             continue;
         }
         if (strncmp(token, MATCH_ARP_OP KEY_VAL, strlen(MATCH_ARP_OP KEY_VAL)) == 0) {
@@ -1077,21 +1100,32 @@ parse_match(char *str, struct ofl_match_header **match) {
         }
         if (strncmp(token, MATCH_NW_SRC KEY_VAL, strlen(MATCH_NW_SRC KEY_VAL)) == 0) {
             uint32_t nw_src;
-            if (parse_nw_addr(token + strlen(MATCH_NW_SRC KEY_VAL), &(nw_src))) {
+            uint32_t *mask;
+            if (parse_nw_addr(token + strlen(MATCH_NW_SRC KEY_VAL), &(nw_src), &mask)) {
                 ofp_fatal(0, "Error parsing ip_src: %s.", token);
             }
-            else ofl_structs_match_put32(m, OXM_OF_IPV4_SRC,nw_src);
+            else { 
+                if (mask == NULL)
+                    ofl_structs_match_put32(m, OXM_OF_IPV4_SRC,nw_src);
+                else
+                    ofl_structs_match_put32m(m, OXM_OF_IPV4_SRC_W, nw_src, *mask);
+            }        
             continue;
         }
         if (strncmp(token, MATCH_NW_DST KEY_VAL, strlen(MATCH_NW_DST KEY_VAL)) == 0) {
             uint32_t nw_dst;
-            if (parse_nw_addr(token + strlen(MATCH_NW_DST KEY_VAL), &nw_dst)) {
+            uint32_t *mask;            
+            if (parse_nw_addr(token + strlen(MATCH_NW_DST KEY_VAL), &nw_dst, &mask)) {
                 ofp_fatal(0, "Error parsing ip_dst: %s.", token);
             }
-            else ofl_structs_match_put32(m, OXM_OF_IPV4_DST,nw_dst);
+            else {
+                if (mask == NULL) 
+                    ofl_structs_match_put32(m, OXM_OF_IPV4_DST,nw_dst);
+                else 
+                    ofl_structs_match_put32m(m, OXM_OF_IPV4_DST,nw_dst, *mask);
+            }
             continue;
         }
-        
         /* ICMP */
         if (strncmp(token, MATCH_ICMPV4_CODE KEY_VAL, strlen(MATCH_ICMPV4_CODE KEY_VAL)) == 0) {
             uint8_t icmpv4_code;
@@ -1246,18 +1280,24 @@ parse_match(char *str, struct ofl_match_header **match) {
         }        
         if (strncmp(token, MATCH_IPV6_ND_SLL KEY_VAL, strlen(MATCH_IPV6_ND_SLL KEY_VAL)) == 0) {
             uint8_t eth_src[6];
-            if (parse_dl_addr(token + strlen(MATCH_IPV6_ND_SLL KEY_VAL), eth_src)) {
+            uint8_t *mask;
+            if (parse_dl_addr(token + strlen(MATCH_IPV6_ND_SLL KEY_VAL), eth_src, &mask)) {
                 ofp_fatal(0, "Error parsing ipv6_nd_sll: %s.", token);
             }
-            else ofl_structs_match_put_eth(m,OXM_OF_IPV6_ND_SLL, eth_src);
+            else {
+                 ofl_structs_match_put_eth(m,OXM_OF_IPV6_ND_SLL, eth_src);
+            }
             continue;
         }
         if (strncmp(token, MATCH_IPV6_ND_TLL KEY_VAL, strlen(MATCH_IPV6_ND_TLL KEY_VAL)) == 0) {
             uint8_t eth_dst[6];
-            if (parse_dl_addr(token + strlen(MATCH_IPV6_ND_TLL KEY_VAL), eth_dst)) {
+            uint8_t *mask;
+            if (parse_dl_addr(token + strlen(MATCH_IPV6_ND_TLL KEY_VAL), eth_dst, &mask)) {
                 ofp_fatal(0, "Error parsing ipv_nd_tll: %s.", token);
             }
-            else ofl_structs_match_put_eth(m, OXM_OF_IPV6_ND_TLL,eth_dst);
+            else {
+                ofl_structs_match_put_eth(m, OXM_OF_IPV6_ND_TLL,eth_dst);
+            }                    
             continue;
         }
         
@@ -1281,8 +1321,9 @@ parse_set_field(char *token, struct ofl_action_set_field *act) {
        
     
     if (strncmp(token, MATCH_DL_SRC KEY_VAL, strlen(MATCH_DL_SRC KEY_VAL)) == 0) {
-        uint8_t* dl_src = xmalloc(6);           
-        if (parse_dl_addr(token + strlen(MATCH_DL_SRC KEY_VAL), dl_src)) {
+        uint8_t* dl_src = xmalloc(6);
+        uint8_t *mask = NULL;                   
+        if (parse_dl_addr(token + strlen(MATCH_DL_SRC KEY_VAL), dl_src, &mask)) {
                 ofp_fatal(0, "Error parsing dl_src: %s.", token);
         }else{ 
                 act->field = (struct ofl_match_tlv*) malloc(sizeof(struct ofl_match_tlv));
@@ -1292,8 +1333,9 @@ parse_set_field(char *token, struct ofl_action_set_field *act) {
         return 0;
     }
     if (strncmp(token, MATCH_DL_DST KEY_VAL, strlen(MATCH_DL_DST KEY_VAL)) == 0) {
-        uint8_t* dl_dst = xmalloc(6);           
-        if (parse_dl_addr(token + strlen(MATCH_DL_SRC KEY_VAL), dl_dst)) {
+        uint8_t* dl_dst = xmalloc(6); 
+        uint8_t *mask = NULL;                                     
+        if (parse_dl_addr(token + strlen(MATCH_DL_DST KEY_VAL), dl_dst, &mask)) {
                 ofp_fatal(0, "Error parsing dl_dst: %s.", token);
         }else{ 
                 act->field = (struct ofl_match_tlv*) malloc(sizeof(struct ofl_match_tlv));
@@ -1313,6 +1355,18 @@ parse_set_field(char *token, struct ofl_action_set_field *act) {
             }
         return 0;
     }
+    if (strncmp(token, MATCH_MPLS_LABEL KEY_VAL, strlen(MATCH_MPLS_LABEL KEY_VAL)) == 0) {
+            uint32_t *mpls_label = malloc(sizeof(uint32_t));
+            if (parse32(token + strlen(MATCH_MPLS_LABEL KEY_VAL), NULL, 0, 0x1000000, mpls_label)) {
+                ofp_fatal(0, "Error parsing mpls label id: %s.", token);
+            }
+            else { 
+                act->field = (struct ofl_match_tlv*) malloc(sizeof(struct ofl_match_tlv));
+                act->field->header = OXM_OF_MPLS_LABEL;                    
+                act->field->value = (uint8_t*) mpls_label;        
+            }
+        return 0;
+    }     
     if (strncmp(token, MATCH_DL_VLAN_PCP KEY_VAL, strlen(MATCH_DL_VLAN_PCP KEY_VAL)) == 0) {
         uint8_t* vlan_pcp = malloc(sizeof(uint8_t));
         if (parse8(token + strlen(MATCH_DL_VLAN_PCP KEY_VAL), NULL, 0, 0x7, vlan_pcp)) {
@@ -1339,7 +1393,9 @@ parse_set_field(char *token, struct ofl_action_set_field *act) {
     }
     if (strncmp(token, MATCH_NW_SRC KEY_VAL, strlen(MATCH_NW_SRC KEY_VAL)) == 0) {
         uint32_t* nw_src = malloc(sizeof(uint32_t));
-        if (parse_nw_addr(token + strlen(MATCH_NW_SRC KEY_VAL), nw_src)) {
+        uint32_t *mask;
+
+        if (parse_nw_addr(token + strlen(MATCH_NW_SRC KEY_VAL), nw_src, &mask)) {
             ofp_fatal(0, "Error parsing ip_src: %s.", token);
         }
         else {
@@ -1351,7 +1407,9 @@ parse_set_field(char *token, struct ofl_action_set_field *act) {
     }
     if (strncmp(token, MATCH_NW_DST KEY_VAL, strlen(MATCH_NW_DST KEY_VAL)) == 0) {
         uint32_t * nw_dst =   malloc(sizeof(uint32_t));
-        if (parse_nw_addr(token + strlen(MATCH_NW_DST KEY_VAL), nw_dst)) {
+        uint32_t *mask;
+
+        if (parse_nw_addr(token + strlen(MATCH_NW_DST KEY_VAL), nw_dst, &mask)) {
                 ofp_fatal(0, "Error parsing ip_dst: %s.", token);
             }
         else {
@@ -1820,8 +1878,9 @@ parse_port_mod(char *str, struct ofl_msg_port_mod *msg) {
             continue;
         }
         if (strncmp(token, PORT_MOD_HW_ADDR KEY_VAL, strlen(PORT_MOD_HW_ADDR KEY_VAL)) == 0) {
-            if (parse_dl_addr(token + strlen(PORT_MOD_HW_ADDR KEY_VAL), msg->hw_addr)) {
-                ofp_fatal(0, "Error parsing port_mod hw_addr: %s.", token);
+            uint8_t *mask = NULL;
+            if (parse_dl_addr(token + strlen(PORT_MOD_HW_ADDR KEY_VAL), msg->hw_addr, &mask)) {                
+              ofp_fatal(0, "Error parsing port_mod hw_addr: %s.", token);
             }
             continue;
         }
@@ -1891,24 +1950,75 @@ parse_table(char *str, uint8_t *table) {
 }
 
 static int
-parse_dl_addr(char *str, uint8_t *addr) {
-    return (sscanf(str, "%"SCNx8":%"SCNx8":%"SCNx8":%"SCNx8":%"SCNx8":%"SCNx8,
-            addr, addr+1, addr+2, addr+3, addr+4, addr+5) != 6);
+parse_dl_addr(char *str, uint8_t *addr, uint8_t **mask) {
+    char *saveptr = NULL; 
+    if (sscanf(str, "%"SCNx8":%"SCNx8":%"SCNx8":%"SCNx8":%"SCNx8":%"SCNx8,
+            addr, addr+1, addr+2, addr+3, addr+4, addr+5) != 6){
+        return -1;
+    }
+    strtok_r(str, MASK_SEP, &saveptr);
+
+    if(strcmp(saveptr,"") == 0){  
+        *mask = NULL;
+        return 0;
+    }
+    else {
+        *mask = (uint8_t*) malloc (sizeof(OFP_ETH_ALEN)); 
+        if (sscanf(saveptr, "%"SCNx8":%"SCNx8":%"SCNx8":%"SCNx8":%"SCNx8":%"SCNx8,
+            *mask, *mask+1, *mask+2, *mask+3, *mask+4, *mask+5) != 6){
+            return -1;
+         }
+    }
+    return 0;
 }
 
 static int
-parse_nw_addr(char *str, uint32_t *addr) {
-    // TODO Zoltan: netmask ?
+parse_nw_addr(char *str, uint32_t *addr, uint32_t **mask) {
     // TODO Zoltan: DNS lookup ?
-    uint8_t a[4];
+    uint8_t a[4],b[4];
+    uint32_t netmask;
+    char *saveptr = NULL; 
 
     if (sscanf(str, "%"SCNu8".%"SCNu8".%"SCNu8".%"SCNu8,
                &a[0], &a[1], &a[2], &a[3]) == 4) {
             *addr = (a[3] << 24) | (a[2] << 16) | (a[1] << 8) | a[0];
+    }
+    else {
+        return -1;
+    }
+    strtok_r(str, MASK_SEP, &saveptr);
+    if(strcmp(saveptr,"") == 0){  
+        *mask = NULL;
         return 0;
     }
-    return -1;
+    *mask = (uint32_t*) malloc(sizeof(uint32_t));
+    netmask = 0xffffffff; 
+    if(strlen(saveptr) <= 2){
+        /* Subnet mask*/
+        uint8_t subnet_mask;
+        sscanf(saveptr, "%"SCNu8"",
+               &subnet_mask);
+        if (subnet_mask > 32)
+            return -1;
+        if (subnet_mask == 0)
+            netmask = 0x00000000;
+        else netmask = netmask << (32 - subnet_mask);
+        **mask = htonl(netmask);
+    }
+    else {
+        /*Arbitrary mask*/
+        if (sscanf(saveptr, "%"SCNu8".%"SCNu8".%"SCNu8".%"SCNu8,
+               &b[0], &b[1], &b[2], &b[3]) == 4) {
+            **mask = (b[3] << 24) | (b[2] << 16) | (b[1] << 8) | b[0];
+        }
+        else {
+            return -1;
+        }
+    }
+
+    return 0;
 }
+
 
 static int
 parse_vlan_vid(char *str, uint16_t *vid) {
