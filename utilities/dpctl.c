@@ -1223,21 +1223,33 @@ parse_match(char *str, struct ofl_match_header **match) {
         /* IPv6 */
         if (strncmp(token, MATCH_NW_SRC_IPV6 KEY_VAL , strlen(MATCH_NW_SRC_IPV6 KEY_VAL)) == 0) {
             struct in6_addr addr, mask;
+            struct in6_addr in6addr_zero = IN6ADDR_ZERO_INIT;
             if (str_to_ipv6(token + strlen(MATCH_NW_DST_IPV6)+1, &addr, &mask) < 0) {
                 ofp_fatal(0, "Error parsing nw_src_ipv6: %s.", token);
             }
             else {
-                ofl_structs_match_put_ipv6(m, OXM_OF_IPV6_SRC, addr.s6_addr);    
+                if(ipv6_addr_equals(&mask, &in6addr_zero)){
+                    ofl_structs_match_put_ipv6(m, OXM_OF_IPV6_SRC, addr.s6_addr);    
+                }
+                else {
+                    ofl_structs_match_put_ipv6m(m, OXM_OF_IPV6_SRC_W,addr.s6_addr, mask.s6_addr); 
+                }
             }
             continue;
         }
         if (strncmp(token, MATCH_NW_DST_IPV6 KEY_VAL , strlen(MATCH_NW_DST_IPV6 KEY_VAL)) == 0) {
             struct in6_addr addr, mask;
+            struct in6_addr in6addr_zero = IN6ADDR_ZERO_INIT;
             if (str_to_ipv6(token + strlen(MATCH_NW_DST_IPV6)+1, &addr, &mask) < 0) {
                 ofp_fatal(0, "Error parsing nw_src_ipv6: %s.", token);
             }
             else {
-                ofl_structs_match_put_ipv6(m, OXM_OF_IPV6_DST, addr.s6_addr);    
+                if(ipv6_addr_equals(&mask, &in6addr_zero)){
+                    ofl_structs_match_put_ipv6(m, OXM_OF_IPV6_DST, addr.s6_addr);    
+                }
+                else {
+                    ofl_structs_match_put_ipv6m(m, OXM_OF_IPV6_DST_W, addr.s6_addr, mask.s6_addr); 
+                }
             }
             continue;
         }
