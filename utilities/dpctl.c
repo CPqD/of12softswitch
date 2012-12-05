@@ -170,6 +170,8 @@ parse16(char *str, struct names16 *names, size_t names_num, uint16_t max, uint16
 static int
 parse32(char *str, struct names32 *names, size_t names_num, uint32_t max, uint32_t *val);
 
+static int
+parse32m(char *str, struct names32 *names, size_t names_num, uint32_t max, uint32_t *val, uint32_t **mask);
 
 static struct ofl_exp_msg dpctl_exp_msg =
         {.pack      = ofl_exp_msg_pack,
@@ -1090,6 +1092,7 @@ parse_match(char *str, struct ofl_match_header **match) {
                  ofl_structs_match_put8(m, OXM_OF_IP_DSCP, ip_dscp);
             continue;
         }
+
         if (strncmp(token, MATCH_NW_PROTO KEY_VAL, strlen(MATCH_NW_PROTO KEY_VAL)) == 0) {
             uint8_t nw_proto;
             if (parse8(token + strlen(MATCH_NW_PROTO KEY_VAL), NULL, 0, 0xff, &nw_proto)) {
@@ -1255,12 +1258,17 @@ parse_match(char *str, struct ofl_match_header **match) {
         }
          if (strncmp(token, MATCH_IPV6_FLABEL KEY_VAL, strlen(MATCH_IPV6_FLABEL KEY_VAL)) == 0) {
             uint32_t ipv6_label;
-            if (parse32(token + strlen(MATCH_IPV6_FLABEL KEY_VAL), NULL, 0, 0xfffff, &ipv6_label)) {
+            uint32_t *mask;
+            if (parse32m(token + strlen(MATCH_IPV6_FLABEL KEY_VAL), NULL, 0, 0x000fffff, &ipv6_label, &mask)) {
                 ofp_fatal(0, "Error parsing ipv6_label: %s.", token);
             }
-            else ofl_structs_match_put32(m,OXM_OF_IPV6_FLABEL, ipv6_label);
-        }  
-                
+            else 
+              if(mask == NULL)
+                ofl_structs_match_put32(m, OXM_OF_IPV6_FLABEL, ipv6_label);
+              else 
+                ofl_structs_match_put32m(m, OXM_OF_IPV6_FLABEL_W, ipv6_label, *mask);
+            continue;
+        }        
         /* ICMPv6 */
         if (strncmp(token, MATCH_ICMPV6_CODE, strlen(MATCH_ICMPV6_CODE KEY_VAL)) == 0) {
             uint8_t icmpv6_code;
@@ -1456,6 +1464,44 @@ parse_set_field(char *token, struct ofl_action_set_field *act) {
         }     
         return 0;
     }
+    if (strncmp(token, MATCH_NW_SRC_IPV6 KEY_VAL , strlen(MATCH_NW_SRC_IPV6 KEY_VAL)) == 0) {
+            struct in6_addr *addr = (struct in6_addr*) malloc(sizeof(struct in6_addr)); 
+            struct in6_addr mask;
+            if (str_to_ipv6(token + strlen(MATCH_NW_SRC_IPV6)+1, addr, &mask) < 0) {
+                ofp_fatal(0, "Error parsing nw_src_ipv6: %s.", token);
+            }
+            else {    
+                act->field = (struct ofl_match_tlv*) malloc(sizeof(struct ofl_match_tlv));
+                act->field->header = OXM_OF_IPV6_SRC;
+                act->field->value = (uint8_t*) addr->s6_addr;
+            }     
+            return 0;
+    }
+    if (strncmp(token, MATCH_NW_DST_IPV6 KEY_VAL , strlen(MATCH_NW_DST_IPV6 KEY_VAL)) == 0) {
+            struct in6_addr *addr = (struct in6_addr*) malloc(sizeof(struct in6_addr)); 
+            struct in6_addr mask;
+            if (str_to_ipv6(token + strlen(MATCH_NW_DST_IPV6)+1, addr, &mask) < 0) {
+                ofp_fatal(0, "Error parsing nw_src_ipv6: %s.", token);
+            }
+            else {    
+                act->field = (struct ofl_match_tlv*) malloc(sizeof(struct ofl_match_tlv));
+                act->field->header = OXM_OF_IPV6_DST;
+                act->field->value = (uint8_t*) addr->s6_addr;
+            }     
+            return 0;
+    }
+    if (strncmp(token, MATCH_IPV6_FLABEL KEY_VAL, strlen(MATCH_IPV6_FLABEL KEY_VAL)) == 0) {
+        uint32_t *ipv6_label = malloc(sizeof(uint32_t));
+        if (parse32(token + strlen(MATCH_IPV6_FLABEL KEY_VAL), NULL, 0, 0x000fffff, ipv6_label)) {
+            ofp_fatal(0, "Error parsing ipv6_label: %s.", token);
+        }
+        else {    
+                act->field = (struct ofl_match_tlv*) malloc(sizeof(struct ofl_match_tlv));
+                act->field->header = OXM_OF_IPV6_FLABEL;
+                act->field->value = (uint8_t*) ipv6_label;
+        }     
+        return 0;
+    }    
     ofp_fatal(0, "Error parsing set_field arg: %s.", token);   
 }
 
@@ -2104,3 +2150,30 @@ parse32(char *str, struct names32 *names, size_t names_num, uint32_t max, uint32
     return -1;
 }
 
+static int
+parse32m(char *str, struct names32 *names, size_t names_num, uint32_t max, uint32_t *val, uint32_t **mask){
+
+    size_t i;
+    char *token, *saveptr = NULL;
+
+    for (i=0; i<names_num; i++) {
+        if (strcmp(str, names[i].name) == 0) {
+            *val = names[i].code;
+        }
+    }
+
+    if ((max > 0) && (*val <= max)) {
+        if (!sscanf(str, "%"SCNu32"", val))
+            return -1;
+    }
+
+    token = strtok_r(str, MASK_SEP, &saveptr);
+
+    if(saveptr == NULL)
+        *mask = NULL;
+    else { 
+        *mask = (uint32_t*) malloc(sizeof(uint32_t));
+        sscanf(saveptr, "%"SCNu32"", *mask);
+    }
+    return 0;
+ }
