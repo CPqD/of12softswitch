@@ -151,7 +151,7 @@ pipeline_process_packet(struct pipeline *pl, struct packet *pkt) {
         
         entry = flow_table_lookup(table, pkt);
         if (entry != NULL) {
-	   if (VLOG_IS_DBG_ENABLED(LOG_MODULE)) {
+	        if (VLOG_IS_DBG_ENABLED(LOG_MODULE)) {
                 char *m = ofl_structs_flow_stats_to_string(entry->stats, pkt->dp->exp);
                 VLOG_DBG_RL(LOG_MODULE, &rl, "found matching entry: %s.", m);
                 free(m);
@@ -169,6 +169,9 @@ pipeline_process_packet(struct pipeline *pl, struct packet *pkt) {
 			VLOG_DBG_RL(LOG_MODULE, &rl, "no matching entry found. executing table conf.");
 			execute_table(pl, table, &next_table, pkt);
 			if (next_table == NULL) {
+                if (pkt->action_set != NULL) {
+                    action_set_execute(pkt->action_set, pkt);
+                }
 				packet_destroy(pkt);
 				return;
 			}
@@ -435,24 +438,30 @@ execute_entry(struct pipeline *pl, struct flow_entry *entry,
                 packet_handle_std_validate(pkt->handle_std);
                 
                 /* Checks if there is a metadata field on the packet. */
-                HMAP_FOR_EACH_WITH_HASH(f, struct packet_fields, hmap_node, hash_int(OXM_OF_METADATA,0), &pkt->handle_std->match.match_fields){
+                HMAP_FOR_EACH_WITH_HASH(f,struct packet_fields, hmap_node, hash_int(OXM_OF_METADATA,0), &pkt->handle_std->match.match_fields){
                     uint64_t *metadata = (uint64_t*) f->value; 
-                    *metadata = (*metadata & ~wi->metadata_mask) | (wi->metadata & wi->metadata_mask);
-                    memcpy(f->value, metadata, sizeof(uint64_t));     
+                    *metadata = (*metadata & ~wi->metadata_mask) | (wi->metadata & wi->metadata_mask);     
                 }
                 break;
+
+                // HMAP_FOR_EACH_WITH_HASH(f, struct packet_fields, hmap_node, hash_int(OXM_OF_METADATA,0), &pkt->handle_std->match.match_fields){
+                //     uint64_t *metadata = (uint64_t*) f->value; 
+                //     *metadata = (*metadata & ~wi->metadata_mask) | (wi->metadata & wi->metadata_mask);
+                //     memcpy(f->value, metadata, sizeof(uint64_t));     
+                // }
+                // break;
                 
-                /*Add metadata to the packet */
-                if(f == NULL){
-                    struct packet_fields *pktout_metadata;
-	                uint64_t metadata;
-	                pktout_metadata = (struct packet_fields*) malloc(sizeof(struct packet_fields));
-                    pktout_metadata->header = OXM_OF_METADATA;
-                    pktout_metadata->value = (uint8_t*) malloc(sizeof(uint64_t) );
-                    metadata =  wi->metadata & wi->metadata_mask;
-                    memcpy(pktout_metadata->value, &metadata, sizeof(uint64_t));
-                    hmap_insert_fast(&pkt->handle_std->match.match_fields, &pktout_metadata->hmap_node, hash_int(pktout_metadata->header, 0)); 
-                }
+                // /*Add metadata to the packet */
+                // if(f == NULL){
+                //     struct packet_fields *pktout_metadata;
+	               //  uint64_t metadata;
+	               //  pktout_metadata = (struct packet_fields*) malloc(sizeof(struct packet_fields));
+                //     pktout_metadata->header = OXM_OF_METADATA;
+                //     pktout_metadata->value = (uint8_t*) malloc(sizeof(uint64_t) );
+                //     metadata =  wi->metadata & wi->metadata_mask;
+                //     memcpy(pktout_metadata->value, &metadata, sizeof(uint64_t));
+                //     hmap_insert_fast(&pkt->handle_std->match.match_fields, &pktout_metadata->hmap_node, hash_int(pktout_metadata->header, 0)); 
+                // }
             }
             case OFPIT_WRITE_ACTIONS: {
                 struct ofl_instruction_actions *wa = (struct ofl_instruction_actions *)inst;
