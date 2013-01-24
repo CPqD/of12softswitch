@@ -701,6 +701,9 @@ parse_options(int argc, char *argv[], struct settings *s)
             s->in_band = true;
             break;
 
+        case 'F':
+            break;
+
         case 'l':
             if (s->n_listeners >= MAX_MGMT) {
                 ofp_fatal(0,
