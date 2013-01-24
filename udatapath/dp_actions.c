@@ -80,21 +80,62 @@ set_field(struct packet *pkt, struct ofl_action_set_field *act )
         HMAP_FOR_EACH_WITH_HASH(iter,struct packet_fields, hmap_node, hash_int(act->field->header,0), &pkt->handle_std->match.match_fields)
         {
             /* TODO: Checksum for SCTP and ICMP */
-            if (iter->header == OXM_OF_IPV4_SRC || iter->header == OXM_OF_IPV4_DST)
+            if (iter->header == OXM_OF_IPV4_SRC || iter->header == OXM_OF_IPV4_DST 
+                || iter->header == OXM_OF_IP_DSCP || iter->header == OXM_OF_IP_ECN)
             {
-                memcpy(((uint8_t*)pkt->buffer->data + iter->pos) , act->field->value , OXM_LENGTH(iter->header));
+                uint16_t *aux_old ;
+                aux_old = (uint16_t *)malloc(sizeof(uint16_t));
+                memcpy(aux_old, ((uint8_t*)pkt->buffer->data + iter->pos - 1) , (2 * OXM_LENGTH(iter->header)));
+                if (iter->header == OXM_OF_IP_DSCP)
+                {
+                    uint8_t* aux;
+                    aux = (uint8_t *)malloc(OXM_LENGTH(iter->header));
+                    memcpy(aux,((uint8_t*)pkt->buffer->data + iter->pos) , OXM_LENGTH(iter->header));
+                    *aux = *aux ^ ((*act->field->value) << 2 );
+                    memcpy(((uint8_t*)pkt->buffer->data + iter->pos) , aux , OXM_LENGTH(iter->header));
+                    free(aux);
+                }
+                else if (iter->header == OXM_OF_IP_ECN)
+                {
+                    memcpy(((uint8_t*)pkt->buffer->data + iter->pos) , act->field->value , OXM_LENGTH(iter->header));
+                }
+                else 
+                {
+                    memcpy(((uint8_t*)pkt->buffer->data + iter->pos) , act->field->value , OXM_LENGTH(iter->header));
+                }
                 
                 // update TCP/UDP checksum
                 struct ip_header *ipv4 = pkt->handle_std->proto->ipv4;
                 if (pkt->handle_std->proto->tcp != NULL) {
                     struct tcp_header *tcp = pkt->handle_std->proto->tcp;
-                    tcp->tcp_csum = recalc_csum32(tcp->tcp_csum, ipv4->ip_src,htonl(*((uint32_t*) act->field->value)));
+                    if (iter->header == OXM_OF_IPV4_SRC)
+                    {
+                        tcp->tcp_csum = recalc_csum16(tcp->tcp_csum, ipv4->ip_src,htonl(*((uint32_t*) act->field->value)));
+                    }
+                    else if (iter->header == OXM_OF_IPV4_DST)
+                    {
+                        tcp->tcp_csum = recalc_csum16(tcp->tcp_csum, ipv4->ip_dst,htonl(*((uint32_t*) act->field->value)));
+                    }
                 } else if (pkt->handle_std->proto->udp != NULL) {
                     struct udp_header *udp = pkt->handle_std->proto->udp;
-                    udp->udp_csum = recalc_csum32(udp->udp_csum, ipv4->ip_src, htonl(*((uint32_t*) act->field->value)));
-
+                    if (iter->header == OXM_OF_IPV4_SRC)
+                    {
+                        udp->udp_csum = recalc_csum32(udp->udp_csum, ipv4->ip_src, htonl(*((uint32_t*) act->field->value)));
+                    }
+                    else if (iter->header == OXM_OF_IPV4_DST)
+                    {
+                        udp->udp_csum = recalc_csum32(udp->udp_csum, ipv4->ip_dst, htonl(*((uint32_t*) act->field->value)));
+                    }
                 }
-                if (iter->header == OXM_OF_IPV4_SRC)
+                if (iter->header == OXM_OF_IP_DSCP || iter->header == OXM_OF_IP_ECN)
+                {
+                    uint16_t *aux ;
+                    aux = (uint16_t *)malloc(sizeof(uint16_t));
+                    memcpy(aux, ((uint8_t*)pkt->buffer->data + iter->pos - 1) , (2 * OXM_LENGTH(iter->header)));
+                    ipv4->ip_csum = recalc_csum16(ipv4->ip_csum, *aux_old, *aux);
+                    free(aux);
+                }
+                else if (iter->header == OXM_OF_IPV4_SRC)
                 {
                     ipv4->ip_csum = recalc_csum32(ipv4->ip_csum, ipv4->ip_src, htonl(*((uint32_t*) act->field->value)));
                 }
@@ -103,6 +144,8 @@ set_field(struct packet *pkt, struct ofl_action_set_field *act )
                     ipv4->ip_csum = recalc_csum32(ipv4->ip_csum, ipv4->ip_dst, htonl(*((uint32_t*) act->field->value)));
                 }  
                 pkt->handle_std->valid = false;
+                packet_handle_std_validate(pkt->handle_std);
+                free(aux_old);
                 return;        	       
             }
             if (iter->header == OXM_OF_TCP_SRC)
@@ -126,7 +169,9 @@ set_field(struct packet *pkt, struct ofl_action_set_field *act )
                 udp->udp_csum = recalc_csum16(udp->udp_csum, udp->udp_dst, htons(*((uint16_t*) act->field->value)));
             }
             if (iter->header == OXM_OF_IPV6_SRC || iter->header == OXM_OF_IPV6_DST || 
-                iter->header == OXM_OF_ETH_SRC || iter->header == OXM_OF_ETH_DST)
+                iter->header == OXM_OF_ETH_SRC || iter->header == OXM_OF_ETH_DST   ||
+                iter->header == OXM_OF_ARP_SPA || iter->header == OXM_OF_ARP_TPA   ||
+                iter->header == OXM_OF_ARP_SHA || iter->header == OXM_OF_ARP_THA)
             {
                 memcpy(((uint8_t*)pkt->buffer->data + iter->pos) , act->field->value , OXM_LENGTH(iter->header));
                 pkt->handle_std->valid = false;
@@ -138,7 +183,7 @@ set_field(struct packet *pkt, struct ofl_action_set_field *act )
     	    for (i=0;i<OXM_LENGTH(iter->header);i++)
     	    {
         	    memcpy(((uint8_t*)tmp + i) , (act->field->value + OXM_LENGTH(iter->header) - i -1 ), 1); 
-    	    }
+    	    }  
     	    memcpy(((uint8_t*)pkt->buffer->data + iter->pos) , tmp , OXM_LENGTH(iter->header));
             pkt->handle_std->valid = false;
     	    return;

@@ -50,12 +50,23 @@
 void
 packet_handle_std_validate(struct packet_handle_std *handle) {
 
-   struct packet_fields * pktout_inport;
-   uint32_t in_port;
-   if(handle->valid)
+    struct packet_fields * pktout_inport, *pktout_metadata;
+    uint32_t in_port;
+    uint64_t metadata = 0xffffffffffffffff;
+    if(handle->valid)
         return;
-        
-   if (nblink_packet_parse(handle->pkt->buffer,&handle->match.match_fields, handle->proto) < 0)
+    struct packet_fields * iter, *next;
+    HMAP_FOR_EACH_SAFE(iter, next, struct packet_fields, hmap_node, &handle->match.match_fields){
+        if ( OXM_TYPE(iter->header) == OXM_TYPE(OXM_OF_METADATA))
+        {
+            memcpy( &metadata, iter->value, sizeof(uint64_t));
+        }
+        free(iter->value);
+        free(iter);
+    }
+    hmap_init(&handle->match.match_fields);
+
+    if (nblink_packet_parse(handle->pkt->buffer,&handle->match.match_fields, handle->proto) < 0)
         return;
     handle->valid = true;
     
@@ -68,6 +79,12 @@ packet_handle_std_validate(struct packet_handle_std *handle) {
     memcpy(pktout_inport->value,&in_port,sizeof(uint32_t));
     hmap_insert(&handle->match.match_fields, &pktout_inport->hmap_node,hash_int(pktout_inport->header, 0));  
 
+    /*Add metadata value to the hash_map */
+    pktout_metadata = (struct packet_fields*) malloc(sizeof(struct packet_fields));
+    pktout_metadata->header = OXM_OF_METADATA;
+    pktout_metadata->value = (uint8_t*) malloc(sizeof(uint64_t) );
+    memcpy(pktout_metadata->value, &metadata, sizeof(uint64_t));
+    hmap_insert(&handle->match.match_fields, &pktout_metadata->hmap_node,hash_int(pktout_metadata->header, 0));  
     return;
 }
 

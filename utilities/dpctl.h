@@ -214,6 +214,7 @@ static struct names16 action_names[] = {
 #define KEY_VAL    "="
 #define KEY_VAL2   ":"
 #define KEY_SEP    ","
+#define MASK_SEP   "/"
 
 #define WILDCARD_ADD   '+'
 #define WILDCARD_SUB   '-'
