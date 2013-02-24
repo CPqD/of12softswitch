@@ -89,7 +89,7 @@ matches_mask16(uint8_t *a, uint8_t *am, uint8_t *b) {
     uint16_t *b1 = (uint16_t *) b;
     uint16_t *mask = (uint16_t *) am;
 
-    return (((~*mask) & (*a1 ^ *b1)) == 0);
+    return (((*mask & *a1) ^ (*mask & *b1)) == 0);
 }
 
 
@@ -116,7 +116,7 @@ pkt_mask32(uint8_t *a, uint8_t *am, uint8_t *b) {
     uint32_t *b1 = (uint32_t *) b;
     uint32_t *mask = (uint32_t *) am;
 
-    return (((~*mask) & (*a1 ^ ntohl(*b1))) == 0);
+    return (((*mask & *a1) ^ (*mask & ntohll(*b1))) == 0);
 }
 
 /*Returns true if two values of 32 bit size match, considering their masks. */
@@ -126,7 +126,7 @@ matches_mask32(uint8_t *a, uint8_t *am, uint8_t *b) {
     uint32_t *b1 = (uint32_t *) b;
     uint32_t *mask = (uint32_t *) am;
 
-    return (((~*mask) & (*a1 ^ *b1)) == 0);
+    return (((*mask & *a1) ^ (*mask & *b1)) == 0);
 }
 
 /* Returns true if two values of 64 bits size match*/
@@ -154,7 +154,7 @@ pkt_mask64(uint8_t *a,uint8_t *am, uint8_t *b) {
     uint64_t *b1 = (uint64_t *) b;
     uint64_t *mask = (uint64_t *) am;
 
-    return (((~*mask) & (*a1 ^ ntohll(*b1))) == 0);
+    return (((*mask & *a1) ^ (*mask & ntohll(*b1))) == 0);
 }
 
 /* Returns true if two values of 64 bits size match, considering their masks.*/
@@ -164,7 +164,7 @@ matches_mask64(uint8_t *a,uint8_t *am, uint8_t *b) {
     uint64_t *b1 = (uint64_t *) b;
     uint64_t *mask = (uint64_t *) am;
 
-    return (((~*mask) & (*a1 ^ *b1)) == 0);
+    return (((*mask & *a1) ^ (*mask & *b1)) == 0);
 }
 
 /* Returns true if the two ethernet addresses match */
@@ -188,6 +188,7 @@ static int
 ipv6_mask(uint8_t *a, uint8_t *am, uint8_t *b) {
     return (matches_mask64(a,am,b) && matches_mask64(a+8,am+8,b+8));
 }
+
 
 bool
 packet_match(struct ofl_match *flow_match, struct ofl_match *packet){
@@ -221,10 +222,16 @@ packet_match(struct ofl_match *flow_match, struct ofl_match *packet){
     /* Loop through the match fields */
     HMAP_FOR_EACH(f, struct ofl_match_tlv, hmap_node, &flow_match->match_fields){
         /* Check if the field is present in the packet */
-        HMAP_FOR_EACH_WITH_HASH(packet_f, struct packet_fields, hmap_node, hash_int(f->header, 0), &packet->match_fields){
+	HMAP_FOR_EACH(packet_f, struct packet_fields, hmap_node, &packet->match_fields){
+            if (OXM_TYPE(f->header) == OXM_TYPE(packet_f->header)) {
+
                 int field_len =  OXM_LENGTH(f->header);
                 bool has_mask = OXM_HASMASK(f->header);
                 ret = true;
+                  if (has_mask)
+                {
+                    field_len = field_len/2;
+                }
                 switch (field_len){
                     case (sizeof(uint8_t)):{
                         if (has_mask){
@@ -239,7 +246,15 @@ packet_match(struct ofl_match *flow_match, struct ofl_match *packet){
                         break;
                     }
                     case (sizeof(uint16_t)):{
-                        if (has_mask){
+                        if (OXM_TYPE(f->header) == OXM_TYPE(OXM_OF_VLAN_VID)) {
+                        	if (*((uint16_t*)f->value) == OFPVID_NONE)
+                        		return false; // we have vlan tag when we expect none
+                        	else if (*((uint16_t*)f->value) == OFPVID_PRESENT && has_mask)
+                        		break; // this is the case where each vlan is a match
+                        	else
+                        		*((uint16_t*)f->value) &= VLAN_VID_MASK; // remove CFI bit
+                        }
+                        else if (has_mask){
                             if (pkt_mask16(f->value,f->value+ field_len, packet_f->value) == 0){
                               return false;
                             }
@@ -251,10 +266,11 @@ packet_match(struct ofl_match *flow_match, struct ofl_match *packet){
                         }
                         break;
                     }
-                    case (sizeof(uint32_t)):{
+
+  					case (sizeof(uint32_t)):{
                         if (has_mask){
-                            if (f->header == OXM_OF_IPV4_DST || f->header == OXM_OF_IPV4_SRC
-							    ||f->header == OXM_OF_ARP_SPA || f->header == OXM_OF_ARP_TPA){
+                            if (OXM_TYPE(f->header) == OXM_TYPE(OXM_OF_IPV4_DST) || OXM_TYPE(f->header) == OXM_TYPE(OXM_OF_IPV4_SRC)
+							    || OXM_TYPE(f->header) == OXM_TYPE(OXM_OF_ARP_SPA) || OXM_TYPE(f->header) == OXM_TYPE(OXM_OF_ARP_TPA)){
 							    if (matches_mask32(f->value,f->value + field_len, packet_f->value) == 0){
                                      return false;
                                 }
@@ -265,16 +281,16 @@ packet_match(struct ofl_match *flow_match, struct ofl_match *packet){
                             }
                         }
                         else
-                            if (f->header == OXM_OF_IPV4_DST || f->header == OXM_OF_IPV4_SRC
-							    ||f->header == OXM_OF_ARP_SPA || f->header == OXM_OF_ARP_TPA){
+                            if (OXM_TYPE(f->header) == OXM_TYPE(OXM_OF_IPV4_DST) || OXM_TYPE(f->header) == OXM_TYPE(OXM_OF_IPV4_SRC)
+							    ||OXM_TYPE(f->header) == OXM_TYPE(OXM_OF_ARP_SPA) || OXM_TYPE(f->header) == OXM_TYPE(OXM_OF_ARP_TPA)){
 							    if (matches_32(f->value, packet_f->value) == 0){
                                      return false;
                                 }
                             }
-
-                            else
+                            else {
                                 if (pkt_match_32(f->value, packet_f->value) == 0){
                                     return false;
+                                }
                             }
                         break;
                     }
@@ -313,10 +329,14 @@ packet_match(struct ofl_match *flow_match, struct ofl_match *packet){
                               return false;
                             }
                         break;
-                    }
+					}
+                 } // end of switch case
+            } // end of if (OXM_TYPE(f->header) == OXM_TYPE(packet_f->header))
+        } // end of packet_match loop
+        if (OXM_TYPE(f->header) == OXM_TYPE(OXM_OF_VLAN_VID))
+        	if (*((uint16_t*)f->value) == OFPVID_NONE)
+        		ret = true; // in case the packet has no vlan and this is what was expected
 
-            }
-        }
          if (!ret)
             return ret;
          else ret = false;
